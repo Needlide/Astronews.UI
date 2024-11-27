@@ -18,7 +18,7 @@
     "@angular/forms": "18.2.13",
     "@angular/platform-browser": "18.2.13",
     "@angular/platform-browser-dynamic": "18.2.13",
-    "@angular/router": "18.2.13",
+    "@angular/router": "19.0.1",
     "@angular/service-worker": "18.2.13",
     "font-awesome": "4.7.0",
     "modern-normalize": "3.0.1",

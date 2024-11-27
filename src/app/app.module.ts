@@ -24,6 +24,7 @@ import { BackToTopComponent } from './back-to-top/back-to-top.component';
 import { DateFormatPipe } from './date-format.pipe';
 import { MobileMenuComponent } from './mobile-menu/mobile-menu.component';
 import { AboutComponent } from './about/about.component';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,7 @@ import { AboutComponent } from './about/about.component';
     BackToTopComponent,
     DateFormatPipe,
     MobileMenuComponent,
-    AboutComponent
+    AboutComponent,
   ],
   imports: [
     BrowserModule,
@@ -50,6 +51,7 @@ import { AboutComponent } from './about/about.component';
     AppRoutingModule,
     HttpClientModule,
     InfiniteScrollModule,
+    SearchBarComponent,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: true,
       //enabled: !isDevMode(),

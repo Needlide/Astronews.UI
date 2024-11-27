@@ -1,0 +1,11 @@
+<div class="search-bar">
+  <input
+    type="text"
+    name="searchTerm"
+    [(ngModel)]="searchTerm"
+    (ngModelChange)="onSearchTermChange()"
+    placeholder="Search..."
+  />
+  <button (click)="clearSearch()" type="button">X</button>
+</div>
+

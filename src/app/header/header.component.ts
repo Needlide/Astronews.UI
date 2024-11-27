@@ -1,26 +1,16 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
-import { SearchService } from '../search.service';
-import { Subject, debounceTime } from 'rxjs';
+import { Component, Renderer2 } from '@angular/core';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
   public isLightTheme = false;
   public searchTerm: string = '';
   public isVisible = false;
 
-  searchSubject = new Subject<string>();
-
-  constructor(private searchService: SearchService, private renderer: Renderer2) {}
-
-  ngOnInit(): void {
-    this.searchSubject.pipe(debounceTime(730)).subscribe((searchText) => {
-      this.searchService.setSearchTerm(searchText);
-    });
-  }
+  constructor(private renderer: Renderer2) {}
 
   public toggleTheme() {
     this.isLightTheme = !this.isLightTheme;
@@ -31,9 +21,8 @@ export class HeaderComponent implements OnInit {
     );
   }
 
-  public clearSearch() {
-    this.searchService.setSearchTerm('');
-    this.searchTerm = '';
+  public onSearchTermChange(searchTerm: string) {
+    this.searchTerm = searchTerm;
   }
 
   public toggleMenu() {

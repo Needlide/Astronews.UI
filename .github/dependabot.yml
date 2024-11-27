@@ -4,4 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "angular"
+        versions: ["*"]
+    versioning-strategy: "increase"
 

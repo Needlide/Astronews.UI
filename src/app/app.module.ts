@@ -1,7 +1,8 @@
-import { NgModule, isDevMode, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -25,6 +26,8 @@ import { DateFormatPipe } from './date-format.pipe';
 import { MobileMenuComponent } from './mobile-menu/mobile-menu.component';
 import { AboutComponent } from './about/about.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
+import { newsReducer } from './news/news.reducer';
+import { NewsEffects } from './news/news.effects';
 
 @NgModule({
   declarations: [
@@ -58,7 +61,9 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
-    })
+    }),
+    StoreModule.forRoot({ news: newsReducer}),
+    EffectsModule.forRoot([NewsEffects])
   ],
   providers: [
     {

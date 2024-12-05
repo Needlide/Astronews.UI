@@ -13,6 +13,7 @@ export class CachingService {
 
   constructor() {}
 
+  // set the caching value with optional "time to last" parameter
   set(key: string, value: any, ttl: number = 600000): void {
     const expiry = Date.now() + ttl;
     this.cache.set(key, { value, expiry });
@@ -34,6 +35,7 @@ export class CachingService {
     return entry.value;
   }
 
+  // clear all the values from the cache
   clear(): void {
     this.cache.clear();
   }

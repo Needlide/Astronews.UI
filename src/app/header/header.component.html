@@ -64,10 +64,7 @@
       </ul>
     </nav>
 
-    <app-search-bar
-      (searchChange)="onSearchTermChange($event)"
-    ></app-search-bar>
-
+    <app-search-bar></app-search-bar>
 
     <div class="theme-switcher">
       <label class="switch">
@@ -86,6 +83,13 @@
       </a>
     </div>
 
-    <app-mobile-menu *ngIf="isVisible" [isLightTheme]="isLightTheme" [isVisible]="isVisible" (isVisibleChange)="onMenuVisibilityChange()" (isLightThemeChange)="onLightThemeChange($event)" class="mobile-menu"></app-mobile-menu>
+    <app-mobile-menu
+      *ngIf="isVisible"
+      [isLightTheme]="isLightTheme"
+      [isVisible]="isVisible"
+      (isVisibleChange)="onMenuVisibilityChange()"
+      (isLightThemeChange)="onLightThemeChange($event)"
+      class="mobile-menu"
+    ></app-mobile-menu>
   </div>
 </header>

@@ -10,6 +10,7 @@ import { UrlBuilderService } from '../url-builder.service';
 import { CachingService } from '../cache/caching.service';
 import { lastValueFrom } from 'rxjs';
 import { GalleryCache } from '../models/gallery/gallery-cache-model';
+import { errorMessageDataFetch, errorUrlGallery } from '../shared/constants';
 
 @Component({
   selector: 'app-nasa-gallery',
@@ -21,7 +22,6 @@ export class NasaGalleryComponent {
   private cacheKeyword: string = '';
   isSearchMode: boolean = false;
   isDataAvailable: boolean = false;
-  private readonly currentUrl: string = '/NasaGallery';
 
   constructor(
     private apiCaller: DataService,
@@ -222,11 +222,9 @@ export class NasaGalleryComponent {
         this.isDataAvailable = false;
       }
     } catch (error) {
-      this.errorService.sendError(
-        'Error occured during data fetch. Please, try again shortly.'
-      );
+      this.errorService.sendError(errorMessageDataFetch);
       this.router.navigate(['/Error'], {
-        state: { returnUrl: this.currentUrl },
+        state: { returnUrl: errorUrlGallery },
       });
     }
   }

@@ -15,6 +15,7 @@ export class SearchBarComponent implements OnInit {
   private searchSubject = new Subject<string>();
 
   @Input() debounceTimeDuration: number = 730;
+  @Input() minSearchLength: number = 3;
 
   constructor(private searchService: SearchService) {}
 
@@ -32,6 +33,8 @@ export class SearchBarComponent implements OnInit {
   }
 
   onSearchTermChange(): void {
-    this.searchSubject.next(this.searchTerm);
+    if (this.searchTerm.length >= this.minSearchLength) {
+      this.searchSubject.next(this.searchTerm);
+    }
   }
 }

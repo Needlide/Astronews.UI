@@ -1,5 +1,5 @@
-import { CameraModel } from './mars-submodels/camera.model';
-import { RoverModel } from './mars-submodels/rover.model';
+import { CameraModel } from './camera.model';
+import { RoverModel } from './rover.model';
 
 export interface MarsRootModel {
   photos: MarsModel[];

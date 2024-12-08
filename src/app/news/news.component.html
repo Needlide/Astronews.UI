@@ -1,47 +1,34 @@
-<div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
+<div *ngIf="data$ | async as data; else noData">
+  <div *ngIf="data.length === 0" class="info-text">Nothing to show</div>
 
-<section
-  class="container content"
-  *ngIf="data.length > 0"
-  infiniteScroll="!isSearchMode"
-  [infiniteScrollDistance]="2"
-  [infiniteScrollThrottle]="100"
-  (scrolled)="onScrollDown()"
->
-  <article class="tile" *ngFor="let item of data; let i = index">
-    <!--<svg
-      class="save-icon"
-      (mouseenter)="onMouseEnter(i)"
-      (mouseleave)="onMouseLeave(i)"
-      (click)="onMouseClick(i)"
-    >
-      <use [attr.xlink:href]="getIcon(i)"></use>
-    </svg>-->
+  <section class="container content" *ngIf="data.length > 0">
+    <article class="tile" *ngFor="let item of data; let i = index">
+      <h2 *ngIf="item.image_url && item.title" style="text-align: center">
+        {{ item.title }}
+      </h2>
 
-    <h2 *ngIf="item.image_url && item.title" style="text-align: center">
-      {{ item.title }}
-    </h2>
+      <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
 
-    <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
+      <p class="tile-summary" *ngIf="item.summary">{{ item.summary }}</p>
 
-    <p class="tile-summary" *ngIf="item.summary">{{ item.summary }}</p>
+      <div>
+        <div class="link-wrapper">
+          <a
+            class="tile-link"
+            *ngIf="item.news_site"
+            [href]="item.url"
+            target="_blank"
+            >{{ item.news_site }}</a
+          >
+        </div>
 
-    <div>
-      <div class="link-wrapper">
-        <a
-          class="tile-link"
-          *ngIf="item.news_site"
-          [href]="item.url"
-          target="_blank"
-          >{{ item.news_site }}</a
-        >
+        <p *ngIf="item.published_at">{{ item.published_at | dateFormat }}</p>
       </div>
-
-      <p *ngIf="item.published_at">{{ item.published_at | dateFormat }}</p>
-    </div>
-  </article>
-</section>
-
-<div *ngIf="isSearchMode" class="pagination-controls">
-  <button [disabled]="!isDataAvailable" (click)="nextPage()">Next</button>
+    </article>
+  </section>
 </div>
+
+<ng-template #noData>
+  <p>Loading...</p>
+</ng-template>
+

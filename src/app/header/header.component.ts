@@ -21,10 +21,6 @@ export class HeaderComponent {
     );
   }
 
-  public onSearchTermChange(searchTerm: string) {
-    this.searchTerm = searchTerm;
-  }
-
   public toggleMenu() {
     this.isVisible = !this.isVisible;
     if (this.isVisible) {

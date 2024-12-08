@@ -2,14 +2,14 @@ import { Component, numberAttribute } from '@angular/core';
 import { DataService } from '../data.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
-import { Data } from '../models/gallery.root.model';
+import { Data } from '../models/gallery/gallery.root.model';
 import { PromptService } from '../prompt.service';
-import { SearchService } from '../search.service';
-import { parseSearchTerm, parseSearchValue } from '../search.util';
+import { SearchService } from '../search/search.service';
+import { parseSearchTerm, parseSearchValue } from '../search/search.util';
 import { UrlBuilderService } from '../url-builder.service';
-import { CachingService } from '../caching.service';
+import { CachingService } from '../cache/caching.service';
 import { lastValueFrom } from 'rxjs';
-import { GalleryCache } from '../models/gallery-cache-model';
+import { GalleryCache } from '../models/gallery/gallery-cache-model';
 
 @Component({
   selector: 'app-nasa-gallery',
@@ -225,7 +225,9 @@ export class NasaGalleryComponent {
       this.errorService.sendError(
         'Error occured during data fetch. Please, try again shortly.'
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
+      this.router.navigate(['/Error'], {
+        state: { returnUrl: this.currentUrl },
+      });
     }
   }
 
@@ -256,11 +258,12 @@ export class NasaGalleryComponent {
 
       this.cacheService.set(key, galleryCache);
     } catch (error) {
-      
       this.errorService.sendError(
         'Error occured during data fetch. Please, try again shortly.'
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
+      this.router.navigate(['/Error'], {
+        state: { returnUrl: this.currentUrl },
+      });
     }
   }
 

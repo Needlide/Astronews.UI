@@ -1,15 +1,18 @@
 import { Component } from '@angular/core';
-import { MarsModel } from '../models/mars.model';
+import { MarsModel } from '../models/mars/mars.model';
 import { DataService } from '../data.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
-import { SearchService } from '../search.service';
-import { parseSearchTerm, parseSearchValue } from '../search.util';
-import { Rovers } from '../models/rovers';
+import { SearchService } from '../search/search.service';
+import { parseSearchTerm, parseSearchValue } from '../search/search.util';
+import { Rovers } from '../models/mars/rovers';
 import { UrlBuilderService } from '../url-builder.service';
-import { CachingService } from '../caching.service';
+import { CachingService } from '../cache/caching.service';
 import { lastValueFrom } from 'rxjs';
-import { CuriosityCameras, MarsRoverCameras } from '../models/rover.cameras';
+import {
+  CuriosityCameras,
+  MarsRoverCameras,
+} from '../models/mars/rover.cameras';
 
 @Component({
   selector: 'app-mars-photos',
@@ -153,7 +156,9 @@ export class MarsPhotosCuriosityComponent {
       this.errorService.sendError(
         'Error occurred during fetching the data. Please, try again shortly.'
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
+      this.router.navigate(['/Error'], {
+        state: { returnUrl: this.currentUrl },
+      });
     }
   }
 
@@ -172,11 +177,12 @@ export class MarsPhotosCuriosityComponent {
         this.cacheService.set(url, this.data);
       }
     } catch (error) {
-  
       this.errorService.sendError(
         'Error occurred during fetching the data. Please, try again shortly.'
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
+      this.router.navigate(['/Error'], {
+        state: { returnUrl: this.currentUrl },
+      });
     }
   }
 

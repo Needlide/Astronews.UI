@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment.prod';
 import { SourceManagerService } from './source-manager.service';
-import { Rovers } from './models/rovers';
+import { Rovers } from './models/mars/rovers';
 import {
   CuriosityCameras,
   MarsRoverCameras,
   OpportunityCameras,
   PerseveranceCameras,
   SpiritCameras,
-} from './models/rover.cameras';
+} from './models/mars/rover.cameras';
 
 enum MediaType {
   Image,

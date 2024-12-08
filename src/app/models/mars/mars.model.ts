@@ -1,3 +1,4 @@
+import { DTO } from '@/app/shared/model.interface';
 import { CameraModel } from './camera.model';
 import { RoverModel } from './rover.model';
 
@@ -9,7 +10,7 @@ export type MarsRootLatestModel = Omit<MarsRootModel, 'photos'> & {
   latest_photos: MarsModel[];
 };
 
-export interface MarsModel {
+export interface MarsModel extends DTO {
   id: number;
   sol: number;
   camera: CameraModel;

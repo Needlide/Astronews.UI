@@ -1,5 +1,5 @@
 import { LinkModel } from '../gallery/link.model';
-import { DataModel } from '../gallery/data.model';
+import { GalleryModel } from './gallery.model';
 
 export interface GalleryRootModel {
   collection: Collection;
@@ -14,7 +14,7 @@ interface Collection {
 }
 
 export interface Data {
-  data: DataModel[];
+  data: GalleryModel[];
   href: string;
   links: LinkModel[];
 }

@@ -1,6 +1,4 @@
-import { DTO } from '@/app/shared/model.interface';
-
-export interface NewsModel extends DTO {
+export interface NewsModel {
   id: number;
   title: string;
   url: string;

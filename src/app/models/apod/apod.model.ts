@@ -1,6 +1,4 @@
-import { DTO } from '@/app/shared/model.interface';
-
-export interface ApodModel extends DTO {
+export interface ApodModel {
   id: number;
   copyright: string;
   date: string;

@@ -1,6 +1,4 @@
-import { DTO } from '@/app/shared/model.interface';
-
-export interface GalleryModel extends DTO {
+export interface GalleryModel {
   center: string;
   date_created: any;
   description: string;

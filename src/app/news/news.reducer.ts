@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { loadNews, loadNewsSuccess, loadNewsFailure } from './news.actions';
-import { NewsModel } from '../models/news.model';
+import { NewsModel } from '../models/news/news.model';
 
 export interface NewsState {
   data: NewsModel[];
@@ -13,7 +13,7 @@ export const initialState: NewsState = {
   data: [],
   nextUrl: '',
   isLoading: false,
-  error: null
+  error: null,
 };
 
 export const newsReducer = createReducer(
@@ -21,19 +21,18 @@ export const newsReducer = createReducer(
   on(loadNews, (state) => ({
     ...state,
     isLoading: true,
-    error: null
+    error: null,
   })),
   on(loadNewsSuccess, (state, { data, nextUrl }) => ({
     ...state,
     data: [...state.data, ...data],
     nextUrl,
     isLoading: false,
-    error: null
+    error: null,
   })),
   on(loadNewsFailure, (state, { error }) => ({
     ...state,
     isLoading: false,
-    error
+    error,
   }))
 );
-

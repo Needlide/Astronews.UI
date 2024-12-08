@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { SearchService } from '../search.service';
+import { SearchService } from '../search/search.service';
 import { Subject, debounceTime } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 

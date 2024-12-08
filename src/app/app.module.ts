@@ -20,9 +20,9 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { SortPipe } from './shared/sort.pipe';
 //import { MarsPhotosOpportunityComponent } from './mars-photos-opportunity/mars-photos-opportunity.component';
 //import { MarsPhotosSpiritComponent } from './mars-photos-spirit/mars-photos-spirit.component';
-import { DataSortPipe } from './data-sort.pipe';
+import { DataSortPipe } from './shared/data-sort.pipe';
 import { BackToTopComponent } from './back-to-top/back-to-top.component';
-import { DateFormatPipe } from './date-format.pipe';
+import { DateFormatPipe } from './shared/date-format.pipe';
 import { MobileMenuComponent } from './mobile-menu/mobile-menu.component';
 import { AboutComponent } from './about/about.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
@@ -60,18 +60,18 @@ import { NewsEffects } from './news/news.effects';
       //enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:30000',
     }),
-    StoreModule.forRoot({ news: newsReducer}),
-    EffectsModule.forRoot([NewsEffects])
+    StoreModule.forRoot({ news: newsReducer }),
+    EffectsModule.forRoot([NewsEffects]),
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptorService,
-      multi: true
-    }
+      multi: true,
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

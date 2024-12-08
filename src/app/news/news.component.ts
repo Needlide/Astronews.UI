@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { NewsModel } from '../models/news.model';
+import { NewsModel } from '../models/news/news.model';
 import { UrlBuilderService } from '../url-builder.service';
 import { Store, select } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { loadNews } from './news.actions';
+import { NewsActions } from './news.actions';
 import { NewsState } from './news.reducer';
-import { selectNewsData, selectNewsLoading, selectNewsError } from './news.selectors';
-
+import {
+  selectNewsData,
+  selectNewsLoading,
+  selectNewsError,
+} from './news.selectors';
 
 @Component({
   selector: 'app-news',
@@ -14,14 +17,16 @@ import { selectNewsData, selectNewsLoading, selectNewsError } from './news.selec
   styleUrls: ['./news.component.scss'],
 })
 export class NewsComponent implements OnInit {
-  data$: Observable<NewsModel[]> = this.store.pipe(select(selectNewsData)) ?? of([]);
+  data$: Observable<NewsModel[]> =
+    this.store.pipe(select(selectNewsData)) ?? of([]);
   isLoading$: Observable<boolean> = this.store.pipe(select(selectNewsLoading));
   error$: Observable<string | null> = this.store.pipe(select(selectNewsError));
-  noData = []
+  noData = [];
 
   constructor(
     private store: Store<NewsState>,
-    private urlBuilder: UrlBuilderService) {}
+    private urlBuilder: UrlBuilderService
+  ) {}
 
   ngOnInit(): void {
     this.loadNews();
@@ -29,7 +34,9 @@ export class NewsComponent implements OnInit {
 
   loadNews(): void {
     const url = this.urlBuilder.getNewsUrl();
-    const cacheKeyword = "default_key";
-    this.store.dispatch(loadNews({ url: url, cacheKey: cacheKeyword}));
+    const cacheKeyword = 'default_key';
+    this.store.dispatch(
+      NewsActions.loadData({ url: url, cacheKey: cacheKeyword })
+    );
   }
 }

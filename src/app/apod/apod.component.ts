@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { ApodModel } from '../models/apod.model';
+import { ApodModel } from '../models/apod/apod.model';
 import { DataService } from '../data.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { SearchService } from '../search.service';
-import { parseSearchTerm } from '../search.util';
-import { CachingService } from '../caching.service';
+import { SearchService } from '../search/search.service';
+import { parseSearchTerm } from '../search/search.util';
+import { CachingService } from '../cache/caching.service';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -167,12 +167,13 @@ export class APODComponent {
       }
 
       this.isDataUpdated = true;
-
     } catch (error) {
       this.errorService.sendError(
         'Error occurred during fetching the data. Please, try again shortly.'
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
+      this.router.navigate(['/Error'], {
+        state: { returnUrl: this.currentUrl },
+      });
     }
   }
 

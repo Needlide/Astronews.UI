@@ -64,6 +64,14 @@ export class PromptService {
   public set MarsCuriosityPrev(value: string) {
     this._marsCuriosityPrev = value;
   }
+
+  private _marsCuriosityCurrentSol: number = 0;
+  public get MarsCuriosityCurrentSol(): number {
+    return this._marsCuriosityCurrentSol;
+  }
+  public set MarsCuriosityCurrentSol(value: number) {
+    this._marsCuriosityCurrentSol = value;
+  }
   // ----------------------------
 
   // MARS OPPORTUNITY

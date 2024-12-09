@@ -4,14 +4,15 @@ import { SearchService } from './search.service';
 import { DataService } from '../data.service';
 import {
   errorMessageDataFetch,
+  errorUrl,
   errorUrlGallery,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { GalleryCache } from '../models/gallery/gallery-cache-model';
-import { PromptService } from '../prompt.service';
+import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
@@ -156,7 +157,7 @@ export class GallerySearchService {
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate(['/Error'], {
+        this.router.navigate([errorUrl], {
           state: { returnUrl: errorUrlGallery },
         });
 

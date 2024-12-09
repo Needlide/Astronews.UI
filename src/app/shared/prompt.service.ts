@@ -21,13 +21,6 @@ export class PromptService {
     this._libraryPrev = value;
   }
 
-  private _isDataAvailable: boolean = false;
-  public get isDataAvailable(): boolean {
-    return this._isDataAvailable;
-  }
-  public set isDataAvailable(value: boolean) {
-    this._isDataAvailable = value;
-  }
   // ---------------------------
 
   // NEWS
@@ -46,6 +39,7 @@ export class PromptService {
   public set NewsPrev(value: string) {
     this._newsPrev = value;
   }
+
   // ----------------------------
 
   // MARS CURIOSITY

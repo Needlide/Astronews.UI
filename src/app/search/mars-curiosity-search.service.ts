@@ -59,6 +59,7 @@ export class MarsCuriositySearchService {
 
     const { property, value } = parseSearchTerm(term);
 
+    // TODO dispatch action to the caching service so the data received from API call could be cached
     switch (property?.toLowerCase()) {
       case 's':
         const valueSign = parseSearchValue(value);

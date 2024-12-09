@@ -34,7 +34,7 @@ export class GallerySearchService {
     let term = this.searchService.getSearchTerm();
 
     if (!term || term.length < minSymbolsToTriggerSearch) {
-      return [];
+      return of([]);
     }
 
     let cache = this.cacheService.get(PAGE_KEYS.NASA_GALLERY, term);

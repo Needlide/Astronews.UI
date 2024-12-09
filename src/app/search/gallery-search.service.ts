@@ -15,7 +15,6 @@ import { PromptService } from '../prompt.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
-import { Data } from '../models/gallery/gallery.root.model';
 
 @Injectable({
   providedIn: 'root',

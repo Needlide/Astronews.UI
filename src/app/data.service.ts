@@ -7,7 +7,7 @@ import { MarsRootLatestModel, MarsRootModel } from './models/mars/mars.model';
 import { ApodModel } from './models/apod/apod.model';
 import { NewsRootModel } from './models/news/news.root.model';
 import { GalleryRootModel } from './models/gallery/gallery.root.model';
-import { ApiKeyService } from './api-key.service';
+import { ApiKeyService } from './api-key/api-key.service';
 
 @Injectable({
   providedIn: 'root',

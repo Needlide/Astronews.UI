@@ -10,6 +10,7 @@ import {
   selectNewsLoading,
   selectNewsError,
 } from './news.selectors';
+import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
 
 @Component({
   selector: 'app-news',
@@ -34,9 +35,8 @@ export class NewsComponent implements OnInit {
 
   loadNews(): void {
     const url = this.urlBuilder.getNewsUrl();
-    const cacheKeyword = 'default_key';
     this.store.dispatch(
-      NewsActions.loadData({ url: url, cacheKey: cacheKeyword })
+      NewsActions.loadData({ url: url, cacheKey: DEFAULT_CACHE_KEYS.NEWS })
     );
   }
 }

@@ -1,15 +1,10 @@
 import { Injectable } from '@angular/core';
 
-interface CacheEntry {
-  value: any;
-  expiry: number;
-}
-
 @Injectable({
   providedIn: 'root',
 })
 export class CachingService {
-  private cache: Map<string, Map<string, CacheEntry>> = new Map();
+  private cache: Map<string, Map<string, any>> = new Map();
 
   constructor() {}
 

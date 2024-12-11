@@ -20,6 +20,7 @@ import {
   CuriosityCameras,
   MarsRoverCameras,
 } from '../models/mars/rover.cameras';
+import { isISO8601Date } from '../shared/iso8601-regex';
 
 @Injectable({
   providedIn: 'root',
@@ -85,7 +86,7 @@ export class MarsCuriositySearchService {
 
         return this.apiCall(urlCn, term);
       case 'ed':
-        if (this.isISO8601Date(value)) {
+        if (isISO8601Date(value)) {
           let urlEd = this.urlBuilder.getMarsUrl(
             undefined,
             value,
@@ -145,10 +146,5 @@ export class MarsCuriositySearchService {
       default:
         return undefined;
     }
-  }
-
-  // check if the input is an ISO8601 date format (YYYY-MM-DD)
-  private isISO8601Date(dateString: string): boolean {
-    return /^\d{4}-\d{2}-\d{2}$/.test(dateString);
   }
 }

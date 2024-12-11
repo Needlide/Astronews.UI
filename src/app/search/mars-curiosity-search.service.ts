@@ -20,7 +20,7 @@ import {
   CuriosityCameras,
   MarsRoverCameras,
 } from '../models/mars/rover.cameras';
-import { isISO8601Date } from '../shared/iso8601-regex';
+import { isISO8601Date } from '../shared/iso8601-date-functions';
 
 @Injectable({
   providedIn: 'root',

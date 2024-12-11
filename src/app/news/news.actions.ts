@@ -14,9 +14,5 @@ export const NewsActions = createActionGroup({
     'Set Current Page': props<{ currentPage: number }>(),
     'Set Items Per Page': props<{ itemsPerPage: number }>(),
     'Set Search Query': props<{ query: string }>(),
-    'Parse Search Query': props<{ prefix: string | null; term: string }>(),
-    'Perform Search': props<{ prefix: string | null; term: string }>(),
-    'Search Success': props<{ results: NewsModel[] }>(),
-    'Search Failure': props<{ error: string }>(),
   },
 });

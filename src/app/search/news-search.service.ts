@@ -15,6 +15,11 @@ import { catchError, map, of } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { ErrorService } from '../error.service';
+import { NewsCache } from '../models/news/news-cache-model';
+import {
+  convertDateToString,
+  isISO8601Date,
+} from '../shared/iso8601-date-functions';
 
 @Injectable({
   providedIn: 'root',
@@ -37,12 +42,11 @@ export class NewsSearchService {
       return of([]);
     }
 
-    let cache = this.cacheService.get(PAGE_KEYS.NEWS, term);
-
-    // TODO update the prompt service variables of news next and previous with a data from cache
+    let cache = this.cacheService.get(PAGE_KEYS.NEWS, term) as NewsCache;
 
     if (cache) {
-      //this.promptService.NewsNext = cache.nextUrl;
+      this.promptService.NewsNext = cache.nextUrl;
+      this.promptService.NewsPrev = cache.prevUrl;
       return of(cache);
     }
 
@@ -88,19 +92,33 @@ export class NewsSearchService {
         return this.apiCall(urlS);
       case 'p':
         let dates = parseSearchValue(value);
-        // TODO make scenarios for published after/published before only
-        // date standart is ISO8601 for the news api
-        // move method from mars search to a shared directory
-        if (dates.length == 2) {
-          let urlP = this.urlBuilder.getNewsUrl(
-            undefined,
-            undefined,
-            dates[0],
-            dates[1]
-          );
+        if (
+          dates.length == 2 &&
+          isISO8601Date(dates[0]) &&
+          isISO8601Date(dates[1])
+        ) {
+          let firstDate = new Date(dates[0]);
+          let secondDate = new Date(dates[1]);
 
-          return this.apiCall(urlP);
-        } else if ()
+          if (firstDate < secondDate) {
+            let urlP = this.urlBuilder.getNewsUrl(
+              undefined,
+              undefined,
+              convertDateToString(firstDate),
+              convertDateToString(secondDate)
+            );
+            return this.apiCall(urlP);
+          } else {
+            let urlP = this.urlBuilder.getNewsUrl(
+              undefined,
+              undefined,
+              convertDateToString(firstDate),
+              convertDateToString(secondDate)
+            );
+            return this.apiCall(urlP);
+          }
+        }
+        return of([]);
       case 'pb':
         let urlPb = this.urlBuilder.getNewsUrl(
           undefined,

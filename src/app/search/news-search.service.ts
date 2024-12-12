@@ -15,7 +15,7 @@ import { catchError, map, of } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { ErrorService } from '../error.service';
-import { NewsCache } from '../models/news/news-cache-model';
+import { NewsCache } from '../models/cache/news-cache-model';
 import {
   convertDateToString,
   isISO8601Date,

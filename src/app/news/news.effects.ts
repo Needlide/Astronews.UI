@@ -6,7 +6,7 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { CachingService } from '../cache/caching.service';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
-import { NewsCache } from '../models/cache/news-cache-model';
+import { NewsCache } from '../models/cache/news-cache.model';
 
 @Injectable()
 export class NewsEffects {

@@ -8,6 +8,14 @@ export const selectNewsData = createSelector(
   (state) => state.data
 );
 
+export const selectNewsPaginationUrls = createSelector(
+  selectNewsState,
+  (state) => ({
+    nextUrl: state.nextUrl,
+    prevUrl: state.prevUrl,
+  })
+);
+
 export const selectNewsNextUrl = createSelector(
   selectNewsState,
   (state) => state.nextUrl

@@ -2,6 +2,8 @@ import { ApodModel } from '../apod/apod.model';
 
 export interface ApodCache {
   data: ApodModel[];
-  nextUrl: string;
-  prevUrl: string;
+  nextStartYear: string;
+  prevStartYear: string;
+  nextEndYear: string;
+  prevEndYear: string;
 }

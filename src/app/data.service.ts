@@ -8,6 +8,7 @@ import { ApodModel } from './models/apod/apod.model';
 import { NewsRootModel } from './models/news/news.root.model';
 import { GalleryRootModel } from './models/gallery/gallery.root.model';
 import { ApiKeyService } from './api-key/api-key.service';
+import { convertDateToString } from './shared/iso8601-date-functions';
 
 @Injectable({
   providedIn: 'root',
@@ -76,10 +77,12 @@ export class DataService {
       .pipe(catchError(this.handleError));
   }
 
-  getApods(startDate: string, endDate: string): Observable<ApodModel[]> {
+  getApods(startDate: Date, endDate: Date): Observable<ApodModel[]> {
     let apiKey = this.apiKeyService.getApiKey();
     let requestUrl = this.apodEndpoint.concat(
-      `?start_date=${startDate}&end_date=${endDate}&api_key=${apiKey}`
+      `?start_date=${convertDateToString(
+        startDate
+      )}&end_date=${convertDateToString(endDate)}&api_key=${apiKey}`
     );
     return this.http
       .get<ApodModel[]>(requestUrl)

@@ -50,7 +50,7 @@ export function subtractMonthFromDate(date: Date): Date {
  * @param {Date} date - The Date object to which one month will be added.
  * @returns {Date} A new Date object representing the date one month later than the input.
  */
-export function addMonthFromDate(date: Date): Date {
+export function addMonthToDate(date: Date): Date {
   let dateLocal = new Date(date);
   dateLocal.setMonth(dateLocal.getMonth() + 1);
   return dateLocal;

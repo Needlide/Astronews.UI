@@ -14,26 +14,44 @@ export function convertDateToString(givenDate: Date): string {
   return yearString;
 }
 
-export function subtractMonthFromDate(startDate: Date, endDate: Date) {
-  let startDateLocal = new Date(startDate);
-  startDateLocal.setDate(startDateLocal.getDate() - 1);
-  startDateLocal.setMonth(startDateLocal.getMonth() - 1);
-
-  let endDateLocal = new Date(endDate);
-  endDateLocal.setDate(endDateLocal.getDate() - 1);
-  endDateLocal.setMonth(endDateLocal.getMonth() - 1);
-
-  return { startDate: startDateLocal, endDate: endDateLocal };
+/**
+ * Subtracts one day from the provided Date object and returns the modified date.
+ *
+ * This function creates a new Date object from the input, subtracts one day, and returns the modified Date object.
+ *
+ * @param {Date} date - The Date object from which one day will be subtracted.
+ * @returns {Date} A new Date object representing the date one day earlier than the input.
+ */
+export function subtractDayFromDate(date: Date): Date {
+  let dateLocal = new Date(date);
+  dateLocal.setDate(dateLocal.getDate() - 1);
+  return dateLocal;
 }
 
-export function addMonthFromDate(startDate: Date, endDate: Date) {
-  let startDateLocal = new Date(startDate);
-  startDateLocal.setDate(startDateLocal.getDate() + 1);
-  startDateLocal.setMonth(startDateLocal.getMonth() + 1);
+/**
+ * Subtracts one month from the provided Date object and returns the modified date.
+ *
+ * This function creates a new Date object from the input, subtracts one month, and returns the modified Date object.
+ *
+ * @param {Date} date - The Date object from which one month will be subtracted.
+ * @returns {Date} A new Date object representing the date one month earlier than the input.
+ */
+export function subtractMonthFromDate(date: Date): Date {
+  let dateLocal = new Date(date);
+  dateLocal.setMonth(dateLocal.getMonth() - 1);
+  return dateLocal;
+}
 
-  let endDateLocal = new Date(endDate);
-  endDateLocal.setDate(endDateLocal.getDate() + 1);
-  endDateLocal.setMonth(endDateLocal.getMonth() + 1);
-
-  return { startDate: startDateLocal, endDate: endDateLocal };
+/**
+ * Adds one month to the provided Date object and returns the modified date.
+ *
+ * This function creates a new Date object from the input, adds one month, and returns the modified Date object.
+ *
+ * @param {Date} date - The Date object to which one month will be added.
+ * @returns {Date} A new Date object representing the date one month later than the input.
+ */
+export function addMonthFromDate(date: Date): Date {
+  let dateLocal = new Date(date);
+  dateLocal.setMonth(dateLocal.getMonth() + 1);
+  return dateLocal;
 }

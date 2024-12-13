@@ -8,7 +8,7 @@ import { ApodModel } from './models/apod/apod.model';
 import { NewsRootModel } from './models/news/news.root.model';
 import { GalleryRootModel } from './models/gallery/gallery.root.model';
 import { ApiKeyService } from './api-key/api-key.service';
-import { convertDateToString } from './shared/iso8601-date-functions';
+import { convertDateToString } from './shared/date-functions';
 
 @Injectable({
   providedIn: 'root',

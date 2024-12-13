@@ -6,6 +6,10 @@ import { ApodActions } from './apod.actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { ApodCache } from '../models/cache/apod-cache.model';
+import {
+  addMonthFromDate,
+  subtractMonthFromDate,
+} from '../shared/date-functions';
 
 @Injectable()
 export class ApodEffects {
@@ -35,12 +39,17 @@ export class ApodEffects {
             .getApods(action.startDate, action.endDate)
             .pipe(
               tap((response) => {
-                let previousDates = this.getPreviousDate(
+                // subtract a month so the API returns data for a whole month
+                // subtract a day to not overlap the existing data with new from API
+                // (API returned data for 15.11 - 15.12,
+                // and to not overlap data with 15.10 - 15.11 we subtract a day)
+
+                let previousDates = subtractMonthFromDate(
                   action.startDate,
                   action.endDate
                 );
 
-                let nextDates = this.getNextDate(
+                let nextDates = addMonthFromDate(
                   action.startDate,
                   action.endDate
                 );
@@ -72,32 +81,4 @@ export class ApodEffects {
       })
     )
   );
-
-  // subtract a month so the API returns data for a whole month
-  // subtract a day to not overlap the existing data with new from API
-  // (API returned data for 15.11 - 15.12,
-  // and to not overlap data with 15.10 - 15.11 we subtract a day)
-  getPreviousDate(startDate: Date, endDate: Date) {
-    let startDateLocal = new Date(startDate);
-    startDateLocal.setDate(startDateLocal.getDate() - 1);
-    startDateLocal.setMonth(startDateLocal.getMonth() - 1);
-
-    let endDateLocal = new Date(endDate);
-    endDateLocal.setDate(endDateLocal.getDate() - 1);
-    endDateLocal.setMonth(endDateLocal.getMonth() - 1);
-
-    return { startDate: startDateLocal, endDate: endDateLocal };
-  }
-
-  getNextDate(startDate: Date, endDate: Date) {
-    let startDateLocal = new Date(startDate);
-    startDateLocal.setDate(startDateLocal.getDate() + 1);
-    startDateLocal.setMonth(startDateLocal.getMonth() + 1);
-
-    let endDateLocal = new Date(endDate);
-    endDateLocal.setDate(endDateLocal.getDate() + 1);
-    endDateLocal.setMonth(endDateLocal.getMonth() + 1);
-
-    return { startDate: startDateLocal, endDate: endDateLocal };
-  }
 }

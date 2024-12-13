@@ -18,10 +18,9 @@ import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
   styleUrls: ['./news.component.scss'],
 })
 export class NewsComponent implements OnInit {
-  data$: Observable<NewsModel[]> =
-    this.store.pipe(select(selectNewsData)) ?? of([]);
-  isLoading$: Observable<boolean> = this.store.pipe(select(selectNewsLoading));
-  error$: Observable<string | null> = this.store.pipe(select(selectNewsError));
+  data$: Observable<NewsModel[]> = this.store.select(selectNewsData) ?? of([]);
+  isLoading$: Observable<boolean> = this.store.select(selectNewsLoading);
+  error$: Observable<string | null> = this.store.select(selectNewsError);
   noData = [];
 
   constructor(

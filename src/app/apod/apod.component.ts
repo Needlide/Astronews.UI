@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApodModel } from '../models/apod/apod.model';
 import { DataService } from '../data.service';
 import { ErrorService } from '../error.service';
@@ -7,14 +7,49 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SearchService } from '../search/search.service';
 import { parseSearchTerm } from '../search/search.util';
 import { CachingService } from '../cache/caching.service';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable, of } from 'rxjs';
+import {
+  convertDateToString,
+  subtractMonthFromDate,
+} from '../shared/date-functions';
+import { select, Store } from '@ngrx/store';
+import { ApodState } from './apod.reducer';
+import {
+  selectApodData,
+  selectApodError,
+  selectApodLoading,
+} from './apod.selectors';
+import { ApodActions } from './apod.actions';
+import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
 
 @Component({
   selector: 'app-apod',
   templateUrl: './apod.component.html',
   styleUrls: ['./apod.component.scss'],
 })
-export class APODComponent {
+export class APODComponent implements OnInit {
+  data$: Observable<ApodModel[]> = this.store.select(selectApodData) ?? of([]);
+  isLoading$: Observable<boolean> = this.store.select(selectApodLoading);
+  error$: Observable<string | null> = this.store.select(selectApodError);
+
+  constructor(private store: Store<ApodState>) {}
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    let endDate = new Date();
+    let startDate = subtractMonthFromDate(endDate);
+    this.store.dispatch(
+      ApodActions.loadData({
+        startDate: startDate,
+        endDate: endDate,
+        cacheKey: DEFAULT_CACHE_KEYS.APOD,
+      })
+    );
+  }
+  /*
   data: ApodModel[] = [];
   date: Date;
   isDataUpdated: boolean = false;
@@ -177,16 +212,6 @@ export class APODComponent {
     }
   }
 
-  private convertDateToString(givenDate: Date): string {
-    let year = givenDate.getFullYear().toString();
-    let month = String(givenDate.getMonth() + 1).padStart(2, '0');
-    let day = String(givenDate.getDate()).padStart(2, '0');
-
-    let yearString = `${year}-${month}-${day}`;
-
-    return yearString;
-  }
-
   isYouTubeLink(url: string): boolean {
     return url.includes('youtube.com') || url.includes('youtu.be');
   }
@@ -198,11 +223,11 @@ export class APODComponent {
   private defaultCallApi(): void {
     let date_default = new Date();
 
-    let dateEnd = this.convertDateToString(date_default);
+    let dateEnd = convertDateToString(date_default);
 
     date_default.setMonth(this.date.getMonth() - 1);
-    let dateStart = this.convertDateToString(date_default);
+    let dateStart = convertDateToString(date_default);
 
     this.apiCall(dateStart, dateEnd);
-  }
+  }*/
 }

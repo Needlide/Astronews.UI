@@ -8,22 +8,11 @@ export const selectApodData = createSelector(
   (state) => state.data
 );
 
-export const selectApodPaginationUrls = createSelector(
+export const selectApodPaginationDates = createSelector(
   selectApodState,
   (state) => ({
-    nextUrl: state.nextUrl,
-    prevUrl: state.prevUrl,
+    paginationValues: state.paginationValues,
   })
-);
-
-export const selectApodNextUrl = createSelector(
-  selectApodState,
-  (state) => state.nextUrl
-);
-
-export const selectApodPrevUrl = createSelector(
-  selectApodState,
-  (state) => state.prevUrl
 );
 
 export const selectApodLoading = createSelector(

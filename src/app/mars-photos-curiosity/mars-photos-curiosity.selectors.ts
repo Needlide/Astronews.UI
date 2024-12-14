@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { MarsCuriosityState } from './mars-photos-curiosity.reducer';
 
 export const selectMarsCuriosityState =
-  createFeatureSelector<MarsCuriosityState>('mars-curiosity');
+  createFeatureSelector<MarsCuriosityState>('marsCuriosity');
 
 export const selectMarsCuriosityData = createSelector(
   selectMarsCuriosityState,

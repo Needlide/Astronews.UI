@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { NasaGalleryState } from './nasa-gallery.reducer';
 
 export const selectNasaGalleryState =
-  createFeatureSelector<NasaGalleryState>('nasa-gallery');
+  createFeatureSelector<NasaGalleryState>('nasaGallery');
 
 export const selectNasaGalleryData = createSelector(
   selectNasaGalleryState,

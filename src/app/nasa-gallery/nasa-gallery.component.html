@@ -1,33 +1,28 @@
-<div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
+<div *ngIf="data$ | async as data">
+  <div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
 
-<section
-  class="container content"
-  *ngIf="data.length > 0"
-  infiniteScroll
-  [infiniteScrollDistance]="2"
-  [infiniteScrollThrottle]="100"
-  (scrolled)="onScrollDown()"
->
-  <article class="tile" *ngFor="let item of data">
-    <div class="tile-content" *ngIf="item.links && item.data[0]">
-      <h2>{{ item.data[0].title }}</h2>
-      <img [src]="item.links[0].href" />
+  <section class="container content" *ngIf="data.length > 0">
+    <article class="tile" *ngFor="let item of data">
+      <div class="tile-content" *ngIf="item.links && item.data[0]">
+        <h2>{{ item.data[0].title }}</h2>
+        <img [src]="item.links[0].href" />
 
-      <div>
-        <p class="tile-summary" *ngIf="item.data[0].description">
-          {{ item.data[0].description }}
-        </p>
-        <p class="tile-summary" *ngIf="item.data[0].center">
-          {{ item.data[0].center }}
-        </p>
-        <p *ngIf="item.data[0].date_created">
-          {{ item.data[0].date_created | dateFormat }}
-        </p>
+        <div>
+          <p class="tile-summary" *ngIf="item.data[0].description">
+            {{ item.data[0].description }}
+          </p>
+          <p class="tile-summary" *ngIf="item.data[0].center">
+            {{ item.data[0].center }}
+          </p>
+          <p *ngIf="item.data[0].date_created">
+            {{ item.data[0].date_created | dateFormat }}
+          </p>
+        </div>
       </div>
-    </div>
-  </article>
-</section>
+    </article>
+  </section>
 
-<div *ngIf="isSearchMode" class="pagination-controls">
+  <!-- <div *ngIf="isSearchMode" class="pagination-controls">
   <button [disabled]="!isDataAvailable" (click)="nextPage()">Next</button>
+</div> -->
 </div>

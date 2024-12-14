@@ -36,8 +36,12 @@ export class ApodEffects {
             })
           );
         } else {
+          // subtract a day because the API doesn't update immediately
+          let modifiedStartDate = subtractDayFromDate(action.startDate);
+          let modifiedEndDate = subtractDayFromDate(action.endDate);
+
           return this.dataService
-            .getApods(action.startDate, action.endDate)
+            .getApods(modifiedStartDate, modifiedEndDate)
             .pipe(
               tap((response) => {
                 // subtract a month so the API returns data for a whole month

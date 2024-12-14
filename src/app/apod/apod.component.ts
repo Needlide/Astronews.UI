@@ -32,7 +32,10 @@ export class APODComponent implements OnInit {
   isLoading$: Observable<boolean> = this.store.select(selectApodLoading);
   error$: Observable<string | null> = this.store.select(selectApodError);
 
-  constructor(private store: Store<ApodState>) {}
+  constructor(
+    private store: Store<ApodState>,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -48,6 +51,14 @@ export class APODComponent implements OnInit {
         cacheKey: DEFAULT_CACHE_KEYS.APOD,
       })
     );
+  }
+
+  isYouTubeLink(url: string): boolean {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
   /*
   data: ApodModel[] = [];

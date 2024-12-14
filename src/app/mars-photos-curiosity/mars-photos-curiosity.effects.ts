@@ -5,7 +5,9 @@ import { MarsCuriosityActions } from './mars-photos-curiosity.actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { MarsCuriosityCache } from '../models/cache/mars-curiosity.model';
+import { Injectable } from '@angular/core';
 
+@Injectable()
 export class MarsCuriosityEffects {
   constructor(
     private actions$: Actions,

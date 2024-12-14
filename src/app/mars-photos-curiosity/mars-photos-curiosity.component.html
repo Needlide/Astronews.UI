@@ -1,33 +1,29 @@
-<div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
+<div *ngIf="data$ | async as data">
+  <div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
 
-<section
-  class="container content"
-  infiniteScroll
-  [infiniteScrollDistance]="2"
-  [infiniteScrollThrottle]="50"
-  (scrolled)="onScrollDown()"
->
-  <article class="tile" *ngFor="let item of data">
-    <div class="tile-content" *ngIf="item.img_src">
-      <div class="text-content">
-        <p class="sol">Sol: {{ item.sol }}</p>
-        <div class="tile-head">
-          <h3>Camera name: {{ item.camera.name }}</h3>
-          <p>Full name: {{ item.camera.full_name }}</p>
+  <section class="container content">
+    <article class="tile" *ngFor="let item of data">
+      <div class="tile-content" *ngIf="item.img_src">
+        <div class="text-content">
+          <p class="sol">Sol: {{ item.sol }}</p>
+          <div class="tile-head">
+            <h3>Camera name: {{ item.camera.name }}</h3>
+            <p>Full name: {{ item.camera.full_name }}</p>
+          </div>
+          <div class="tile-summary">
+            <h3>{{ item.rover.name }}</h3>
+            <p>Launch date: {{ item.rover.launch_date }}</p>
+            <p>Landing date: {{ item.rover.landing_date }}</p>
+            <p>
+              Last Martian day (sol) with photo data: {{ item.rover.max_sol }}
+            </p>
+            <p>Last Earth day with photo data: {{ item.rover.max_date }}</p>
+            <p>Rover's mission status: {{ item.rover.status }}</p>
+          </div>
+          <p>{{ item.earth_date }}</p>
         </div>
-        <div class="tile-summary">
-          <h3>{{ item.rover.name }}</h3>
-          <p>Launch date: {{ item.rover.launch_date }}</p>
-          <p>Landing date: {{ item.rover.landing_date }}</p>
-          <p>
-            Last Martian day (sol) with photo data: {{ item.rover.max_sol }}
-          </p>
-          <p>Last Earth day with photo data: {{ item.rover.max_date }}</p>
-          <p>Rover's mission status: {{ item.rover.status }}</p>
-        </div>
-        <p>{{ item.earth_date }}</p>
+        <img [src]="item.img_src" />
       </div>
-      <img [src]="item.img_src" />
-    </div>
-  </article>
-</section>
+    </article>
+  </section>
+</div>

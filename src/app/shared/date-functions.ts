@@ -1,9 +1,9 @@
-// check if the input is an ISO8601 date format (YYYY-MM-DD)
+// check if the input is an ISO8601 date format (yyyy-MM-dd)
 export function isISO8601Date(dateString: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(dateString);
 }
 
-// transform Date object to an ISO8601 format (YYYY-MM-DD)
+// transform Date object to an ISO8601 format (yyyy-MM-dd)
 export function convertDateToString(givenDate: Date): string {
   let year = givenDate.getFullYear().toString();
   let month = String(givenDate.getMonth() + 1).padStart(2, '0');

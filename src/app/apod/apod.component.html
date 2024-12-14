@@ -1,39 +1,32 @@
-<div *ngIf="(data.length == 0)" class="info-text">
-Nothing to show
-</div>
+<div *ngIf="data$ | async as data">
+  <div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
 
-<section
-  class="container content"
-  *ngIf="data.length > 0"
-  infiniteScroll
-  [infiniteScrollDistance]="1"
-  [infiniteScrollThrottle]="200"
-  (scrolled)="onScrollDown()"
->
-  <article *ngFor="let item of data | dataSort : 'date'">
-    <div class="apod-image-card" *ngIf="item.url && item.title">
-      <h2 class="image-title">{{ item.title }}</h2>
-      <p class="image-explanation">{{ item.explanation }}</p>
-      <div class="video-container" *ngIf="isYouTubeLink(item.url)">
-        <iframe
-          [src]="getSafeUrl(item.url)"
-          allowfullscreen="true"
-          referrerpolicy="no-referrer"
-          frameborder="0"
-        ></iframe>
+  <section class="container content" *ngIf="data.length > 0">
+    <article *ngFor="let item of data | dataSort : 'date'">
+      <div class="apod-image-card" *ngIf="item.url && item.title">
+        <h2 class="image-title">{{ item.title }}</h2>
+        <p class="image-explanation">{{ item.explanation }}</p>
+        <div class="video-container" *ngIf="isYouTubeLink(item.url)">
+          <iframe
+            [src]="getSafeUrl(item.url)"
+            allowfullscreen="true"
+            referrerpolicy="no-referrer"
+            frameborder="0"
+          ></iframe>
+        </div>
+        <img class="image" *ngIf="!isYouTubeLink(item.url)" [src]="item.url" />
+        <div>
+          <p class="image-copyright">{{ item.copyright }}</p>
+          <p class="image-date">{{ item.date }}</p>
+          <a
+            class="hd-link"
+            *ngIf="!isYouTubeLink(item.url)"
+            [href]="item.hdurl"
+            target="_blank"
+            >HD image</a
+          >
+        </div>
       </div>
-      <img class="image" *ngIf="!isYouTubeLink(item.url)" [src]="item.url" />
-      <div>
-        <p class="image-copyright">{{ item.copyright }}</p>
-        <p class="image-date">{{ item.date }}</p>
-        <a
-          class="hd-link"
-          *ngIf="!isYouTubeLink(item.url)"
-          [href]="item.hdurl"
-          target="_blank"
-          >HD image</a
-        >
-      </div>
-    </div>
-  </article>
-</section>
+    </article>
+  </section>
+</div>

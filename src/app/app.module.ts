@@ -28,6 +28,12 @@ import { AboutComponent } from './about/about.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { newsReducer } from './news/news.reducer';
 import { NewsEffects } from './news/news.effects';
+import { marsCuriosityReducer } from './mars-photos-curiosity/mars-photos-curiosity.reducer';
+import { nasaGalleryReducer } from './nasa-gallery/nasa-gallery.reducer';
+import { apodReducer } from './apod/apod.reducer';
+import { MarsCuriosityEffects } from './mars-photos-curiosity/mars-photos-curiosity.effects';
+import { NasaGalleryEffects } from './nasa-gallery/nasa-gallery.effects';
+import { ApodEffects } from './apod/apod.effects';
 
 @NgModule({
   declarations: [
@@ -62,8 +68,18 @@ import { NewsEffects } from './news/news.effects';
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000',
     }),
-    StoreModule.forRoot({ news: newsReducer }),
-    EffectsModule.forRoot([NewsEffects]),
+    StoreModule.forRoot({
+      news: newsReducer,
+      marsCuriosity: marsCuriosityReducer,
+      nasaGallery: nasaGalleryReducer,
+      apod: apodReducer,
+    }),
+    EffectsModule.forRoot([
+      NewsEffects,
+      MarsCuriosityEffects,
+      NasaGalleryEffects,
+      ApodEffects,
+    ]),
   ],
   providers: [
     {

@@ -1,19 +1,18 @@
 import { createReducer, on } from '@ngrx/store';
 import { ApodModel } from '../models/apod/apod.model';
 import { ApodActions } from './apod.actions';
+import { ApodPayload } from '../models/cache/apod-cache.model';
 
 export interface ApodState {
   data: ApodModel[];
-  nextUrl: string;
-  prevUrl: string;
+  paginationValues: ApodPayload[];
   isLoading: boolean;
   error: string | null;
 }
 
 export const initialState: ApodState = {
   data: [],
-  nextUrl: '',
-  prevUrl: '',
+  paginationValues: [],
   isLoading: false,
   error: null,
 };
@@ -25,11 +24,10 @@ export const apodReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  on(ApodActions.loadDataSuccess, (state, { data, nextUrl, prevUrl }) => ({
+  on(ApodActions.loadDataSuccess, (state, { data, paginationValues }) => ({
     ...state,
     data: [...state.data, ...data],
-    nextUrl,
-    prevUrl,
+    paginationValues: [...state.paginationValues, ...paginationValues],
     isLoading: false,
     error: null,
   })),

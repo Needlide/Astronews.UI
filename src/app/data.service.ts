@@ -61,6 +61,7 @@ export class DataService {
       .pipe(catchError(this.handleError));
   }
 
+  // difference between `getMarsPhotos` and `getMarsLatestPhotos` in the name of the returned property from the API
   getMarsLatestPhotos(url: string): Observable<MarsRootLatestModel> {
     let apiKey = this.apiKeyService.getApiKey();
 
@@ -71,7 +72,6 @@ export class DataService {
     } else {
       requestUrl = requestUrl.concat(`?api_key=${apiKey}`);
     }
-    console.log(requestUrl);
     return this.http
       .get<MarsRootLatestModel>(requestUrl)
       .pipe(catchError(this.handleError));

@@ -7,6 +7,7 @@ export const MarsCuriosityActions = createActionGroup({
     'Load Data': props<{ url: string; cacheKey: string }>(),
     'Load Data Success': props<{
       data: MarsModel[];
+      maxSol: number;
     }>(),
     'Load Data Failure': props<{ error: string }>(),
   },

@@ -1,23 +1,58 @@
-import { Component, numberAttribute } from '@angular/core';
+import { Component, numberAttribute, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { Data } from '../models/gallery/gallery.root.model';
-import { PromptService } from '../prompt.service';
+import { PromptService } from '../shared/prompt.service';
 import { SearchService } from '../search/search.service';
 import { parseSearchTerm, parseSearchValue } from '../search/search.util';
 import { UrlBuilderService } from '../url-builder.service';
 import { CachingService } from '../cache/caching.service';
-import { lastValueFrom } from 'rxjs';
-import { GalleryCache } from '../models/gallery/gallery-cache-model';
+import { lastValueFrom, Observable } from 'rxjs';
+import { GalleryCache } from '../models/cache/gallery-cache.model';
 import { errorMessageDataFetch, errorUrlGallery } from '../shared/constants';
+import { GalleryModel } from '../models/gallery/gallery.model';
+import { Store } from '@ngrx/store';
+import {
+  selectNasaGalleryData,
+  selectNasaGalleryError,
+  selectNasaGalleryIsLoading,
+} from './nasa-gallery.selectors';
+import { NasaGalleryState } from './nasa-gallery.reducer';
+import { NasaGalleryActions } from './nasa-gallery.actions';
+import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
 
 @Component({
   selector: 'app-nasa-gallery',
   templateUrl: './nasa-gallery.component.html',
   styleUrls: ['./nasa-gallery.component.scss'],
 })
-export class NasaGalleryComponent {
+export class NasaGalleryComponent implements OnInit {
+  data$: Observable<GalleryModel[]> = this.store.select(selectNasaGalleryData);
+  isLoading$: Observable<boolean> = this.store.select(
+    selectNasaGalleryIsLoading
+  );
+  error$: Observable<string | null> = this.store.select(selectNasaGalleryError);
+
+  constructor(
+    private store: Store<NasaGalleryState>,
+    private urlBuilder: UrlBuilderService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    const url = this.urlBuilder.getGalleryUrl();
+    this.store.dispatch(
+      NasaGalleryActions.loadData({
+        url: url,
+        cacheKey: DEFAULT_CACHE_KEYS.NASA_GALLERY,
+      })
+    );
+  }
+  /*
   data: Data[] = [];
   private cacheKeyword: string = '';
   isSearchMode: boolean = false;
@@ -268,4 +303,5 @@ export class NasaGalleryComponent {
   async nextPage() {
     await this.apiCall(this.promptService.LibraryNext, this.cacheKeyword);
   }
+  */
 }

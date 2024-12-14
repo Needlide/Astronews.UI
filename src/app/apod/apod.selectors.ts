@@ -10,9 +10,7 @@ export const selectApodData = createSelector(
 
 export const selectApodPaginationDates = createSelector(
   selectApodState,
-  (state) => ({
-    paginationValues: state.paginationValues,
-  })
+  (state) => state.paginationValues
 );
 
 export const selectApodLoading = createSelector(

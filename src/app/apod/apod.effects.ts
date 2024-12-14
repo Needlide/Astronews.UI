@@ -7,7 +7,7 @@ import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { ApodCache } from '../models/cache/apod-cache.model';
 import {
-  addMonthFromDate,
+  subtractDayFromDate,
   subtractMonthFromDate,
 } from '../shared/date-functions';
 
@@ -32,6 +32,7 @@ export class ApodEffects {
           return of(
             ApodActions.loadDataSuccess({
               data: cache.data,
+              paginationValues: cache.paginationValues,
             })
           );
         } else {
@@ -41,25 +42,23 @@ export class ApodEffects {
               tap((response) => {
                 // subtract a month so the API returns data for a whole month
                 // subtract a day to not overlap the existing data with new from API
-                // (API returned data for 15.11 - 15.12,
-                // and to not overlap data with 15.10 - 15.11 we subtract a day)
+                // (example: API returned data for 15.11 - 15.12 (dd-MM),
+                // and to not overlap data with 15.10 - 15.11 we subtract a day,
+                // so we get results for 14.10 - 14.11, without duplicating 15.11)
 
-                let previousDates = subtractMonthFromDate(
-                  action.startDate,
-                  action.endDate
+                let previousStartDate = subtractDayFromDate(
+                  subtractMonthFromDate(action.startDate)
                 );
 
-                let nextDates = addMonthFromDate(
-                  action.startDate,
-                  action.endDate
+                let previousEndDate = subtractDayFromDate(
+                  subtractMonthFromDate(action.endDate)
                 );
 
                 const apodCache: ApodCache = {
                   data: response,
-                  nextStartYear: nextDates.startDate,
-                  nextEndYear: nextDates.endDate,
-                  prevStartYear: previousDates.startDate,
-                  prevEndYear: previousDates.endDate,
+                  paginationValues: [
+                    { startDate: previousStartDate, endDate: previousEndDate },
+                  ],
                 };
 
                 this.cacheService.set(
@@ -71,6 +70,7 @@ export class ApodEffects {
               map((response) =>
                 ApodActions.loadDataSuccess({
                   data: response,
+                  paginationValues: [],
                 })
               ),
               catchError((error) =>

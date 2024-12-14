@@ -1,7 +1,5 @@
-import { Data } from './gallery.root.model';
+import { GalleryModel } from '../gallery/gallery.model';
 
 export interface GalleryCache {
-  data: Data[];
-  nextUrl: string;
-  prevUrl: string;
+  data: GalleryModel[];
 }

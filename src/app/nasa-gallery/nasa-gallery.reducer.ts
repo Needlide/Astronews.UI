@@ -1,9 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
-import { GalleryModel } from '../models/gallery/gallery.model';
 import { NasaGalleryActions } from './nasa-gallery.actions';
+import { Data } from '../models/gallery/gallery.root.model';
 
 export interface NasaGalleryState {
-  data: GalleryModel[];
+  data: Data[];
   isLoading: boolean;
   error: string | null;
 }

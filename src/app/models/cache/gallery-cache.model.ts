@@ -1,5 +1,5 @@
-import { GalleryModel } from '../gallery/gallery.model';
+import { Data } from '../gallery/gallery.root.model';
 
 export interface GalleryCache {
-  data: GalleryModel[];
+  data: Data[];
 }

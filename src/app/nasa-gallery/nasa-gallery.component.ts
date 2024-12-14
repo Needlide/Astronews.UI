@@ -28,7 +28,7 @@ import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
   styleUrls: ['./nasa-gallery.component.scss'],
 })
 export class NasaGalleryComponent implements OnInit {
-  data$: Observable<GalleryModel[]> = this.store.select(selectNasaGalleryData);
+  data$: Observable<Data[]> = this.store.select(selectNasaGalleryData);
   isLoading$: Observable<boolean> = this.store.select(
     selectNasaGalleryIsLoading
   );

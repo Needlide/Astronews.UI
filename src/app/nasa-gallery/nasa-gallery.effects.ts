@@ -30,7 +30,7 @@ export class NasaGalleryEffects {
           return this.dataService.getNasaGallery(action.url).pipe(
             tap((response) => {
               const galleryCache: GalleryCache = {
-                data: response.collection.items[0].data,
+                data: response.collection.items,
               };
 
               this.cacheService.set(
@@ -41,7 +41,7 @@ export class NasaGalleryEffects {
             }),
             map((response) =>
               NasaGalleryActions.loadDataSuccess({
-                data: response.collection.items[0].data,
+                data: response.collection.items,
               })
             ),
             catchError((error) =>

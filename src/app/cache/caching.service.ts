@@ -8,20 +8,37 @@ export class CachingService {
 
   constructor() {}
 
-  // set the caching value with optional "time to last" parameter
+  /**
+   * Set the cache value for the specified page with expiration time.
+   *
+   * @param page Key for the page which data needs to be set.
+   * @param key Key for the data to be set.
+   * @param value Value which needs to be cached.
+   * @param ttl Optional parameter Time-To-Live in milliseconds. Default value is 600_000 (10 minutes).
+   */
   set(page: string, key: string, value: any, ttl: number = 600000): void {
-    const pageCache = this.cache.get(page) || new Map();
+    const pageCache = this.cache.get(page) || new Map<string, any>();
     const expiry = Date.now() + ttl;
     pageCache.set(key, { value, expiry });
 
     setTimeout(() => {
       pageCache.delete(key);
       if (pageCache.size === 0) {
-        this.cache.delete(page);
+        this.clearPage(page);
       }
     }, ttl);
+
+    this.cache.set(page, pageCache);
   }
 
+  /**
+   * Retrieves the cached value for the specified page and key.
+   * If the cache entry has expired or does not exist, returns `null`.
+   *
+   * @param {string} page The key representing the page from which to retrieve data.
+   * @param {string} key The key associated with the cached data to retrieve.
+   * @returns {any | null} The cached value if it exists and is not expired; otherwise, `null`.
+   */
   get(page: string, key: string): any | null {
     const pageCache = this.cache.get(page);
     if (!pageCache) {
@@ -37,7 +54,7 @@ export class CachingService {
       pageCache.delete(key);
 
       if (pageCache.size === 0) {
-        this.cache.delete(page);
+        this.clearPage(page);
       }
       return null;
     }

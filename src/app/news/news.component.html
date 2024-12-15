@@ -1,6 +1,4 @@
-<div *ngIf="isLoading$ | async" class="spinner-container">
-  <app-loading-spinner></app-loading-spinner>
-</div>
+<app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
 <div *ngIf="data$ | async as data">
   <section class="container content" *ngIf="data.length > 0">
     <article class="tile" *ngFor="let item of data; let i = index">

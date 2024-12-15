@@ -1,6 +1,7 @@
-<div *ngIf="data$ | async as data; else noData">
-  <div *ngIf="data.length === 0" class="info-text">Nothing to show</div>
-
+<div *ngIf="isLoading$ | async" class="spinner-container">
+  <app-loading-spinner></app-loading-spinner>
+</div>
+<div *ngIf="data$ | async as data">
   <section class="container content" *ngIf="data.length > 0">
     <article class="tile" *ngFor="let item of data; let i = index">
       <h2 *ngIf="item.image_url && item.title" style="text-align: center">
@@ -27,8 +28,3 @@
     </article>
   </section>
 </div>
-
-<ng-template #noData>
-  <p>Loading...</p>
-</ng-template>
-

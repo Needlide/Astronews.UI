@@ -34,6 +34,7 @@ import { apodReducer } from './apod/apod.reducer';
 import { MarsCuriosityEffects } from './mars-photos-curiosity/mars-photos-curiosity.effects';
 import { NasaGalleryEffects } from './nasa-gallery/nasa-gallery.effects';
 import { ApodEffects } from './apod/apod.effects';
+import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { ApodEffects } from './apod/apod.effects';
     AboutComponent,
   ],
   imports: [
+    LoadingSpinnerComponent,
     BrowserModule,
     FormsModule,
     AppRoutingModule,

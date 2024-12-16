@@ -6,7 +6,9 @@
         {{ item.title }}
       </h2>
 
-      <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
+      <a [href]="item.url" target="_blank">
+        <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
+      </a>
 
       <p class="tile-summary" *ngIf="item.summary">{{ item.summary }}</p>
 

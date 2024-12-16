@@ -6,7 +6,6 @@ export const SearchActions = createActionGroup({
     'Set Search Term': props<{ term: string }>(), // search initiated
     'Clear Search Term': emptyProps(),
     'Set Search Results': props<{ results: any[] }>(),
-    'Clear Search Results': emptyProps()
-  }
+    'Clear Search Results': emptyProps(),
+  },
 });
-

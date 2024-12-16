@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NewsModel } from '../models/news/news.model';
 import { UrlBuilderService } from '../url-builder.service';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { NewsActions } from './news.actions';
 import { NewsState } from './news.reducer';
 import {

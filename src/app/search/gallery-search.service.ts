@@ -11,7 +11,7 @@ import {
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { catchError, map, of } from 'rxjs';
-import { GalleryCache } from '../models/gallery/gallery-cache-model';
+import { GalleryCache } from '../models/cache/gallery-cache.model';
 import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';

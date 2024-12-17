@@ -21,7 +21,6 @@ export class NewsComponent implements OnInit {
   data$: Observable<NewsModel[]> = this.store.select(selectNewsData);
   isLoading$: Observable<boolean> = this.store.select(selectNewsLoading);
   error$: Observable<string | null> = this.store.select(selectNewsError);
-  noData = [];
 
   constructor(
     private store: Store<NewsState>,

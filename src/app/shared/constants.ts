@@ -5,3 +5,4 @@ export const errorUrlGallery = '/NasaGallery';
 export const errorUrlMarsCuriosity = '/MarsPhotos/Curiosity';
 export const errorUrlNews = '/News';
 export const errorUrl = '/Error';
+export const searchPause = 730;

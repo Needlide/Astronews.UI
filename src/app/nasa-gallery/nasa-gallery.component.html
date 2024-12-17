@@ -1,7 +1,5 @@
 <app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
 <div *ngIf="data$ | async as data">
-  <div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
-
   <section class="container content" *ngIf="data.length > 0">
     <article class="tile" *ngFor="let item of data">
       <div class="tile-content" *ngIf="item.links && item.data[0]">

@@ -113,7 +113,14 @@ export class NewsSearchService {
         let urlPa = this.urlBuilder.getNewsUrl(undefined, undefined, value);
         return this.apiCall(urlPa);
       default:
-        return of([] as NewsModel[]);
+        let urlDefault = this.urlBuilder.getNewsUrl(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          value
+        );
+        return this.apiCall(urlDefault);
     }
   }
 

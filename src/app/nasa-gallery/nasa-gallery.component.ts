@@ -11,6 +11,7 @@ import {
 import { NasaGalleryState } from './nasa-gallery.reducer';
 import { NasaGalleryActions } from './nasa-gallery.actions';
 import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
+import { SearchService } from '../search/search.service';
 
 @Component({
   selector: 'app-nasa-gallery',
@@ -26,20 +27,20 @@ export class NasaGalleryComponent implements OnInit {
 
   constructor(
     private store: Store<NasaGalleryState>,
-    private urlBuilder: UrlBuilderService
+    private searchService: SearchService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
+
+    this.searchService.searchTerm$.subscribe((searchText) => {
+      this.store.dispatch(
+        NasaGalleryActions.loadData({ searchTerm: searchText })
+      );
+    });
   }
 
   loadData(): void {
-    const url = this.urlBuilder.getGalleryUrl();
-    this.store.dispatch(
-      NasaGalleryActions.loadData({
-        url: url,
-        cacheKey: DEFAULT_CACHE_KEYS.NASA_GALLERY,
-      })
-    );
+    this.store.dispatch(NasaGalleryActions.loadData({ searchTerm: '' }));
   }
 }

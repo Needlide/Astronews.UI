@@ -10,12 +10,13 @@ import {
 } from '../shared/constants';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { GalleryCache } from '../models/cache/gallery-cache.model';
 import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
+import { Data } from '../models/gallery/gallery.root.model';
 
 @Injectable({
   providedIn: 'root',
@@ -31,11 +32,19 @@ export class GallerySearchService {
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search() {
-    let term = this.searchService.getSearchTerm();
-
+  search(term: string): Observable<Data[]> {
     if (!term || term.length < minSymbolsToTriggerSearch) {
-      return of([]);
+      let defaultCache = this.cacheService.get(
+        PAGE_KEYS.NASA_GALLERY,
+        DEFAULT_CACHE_KEYS.NASA_GALLERY
+      ) as Data[];
+
+      if (defaultCache) {
+        return of(defaultCache);
+      } else {
+        let defaultUrl = this.urlBuilder.getGalleryUrl();
+        return this.apiCall(defaultUrl, DEFAULT_CACHE_KEYS.NASA_GALLERY);
+      }
     }
 
     let cache = this.cacheService.get(PAGE_KEYS.NASA_GALLERY, term);
@@ -129,7 +138,7 @@ export class GallerySearchService {
       map((responseData) => {
         // if length of the response is 0 return an empty array
         if (responseData.collection.items.length === 0) {
-          return of([]);
+          return [];
         }
 
         const data = responseData.collection.items;
@@ -139,21 +148,10 @@ export class GallerySearchService {
           (x) => x.prompt === 'Next'
         )?.href;
 
-        // create a cache object of the NASA gallery
-        const galleryCache = {} as GalleryCache;
-        galleryCache.data = data;
-
-        const nextUrl = nextUrlRetrieved || '';
-        galleryCache.nextUrl = nextUrl;
-
-        // set the values so the page will know if there is a data available
-        this.promptService.isDataAvailable = !!nextUrl;
-        this.promptService.LibraryNext = nextUrl;
-
         // set the data in the cache
-        this.cacheService.set(PAGE_KEYS.NASA_GALLERY, key, galleryCache);
+        this.cacheService.set(PAGE_KEYS.NASA_GALLERY, key, data);
 
-        return of(data);
+        return data;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
@@ -161,7 +159,7 @@ export class GallerySearchService {
           state: { returnUrl: errorUrlGallery },
         });
 
-        return of([]);
+        return [];
       })
     );
   }

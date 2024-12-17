@@ -27,14 +27,8 @@ export class NewsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadNews();
-
     this.searchService.searchTerm$.subscribe((searchText) => {
       this.store.dispatch(NewsActions.loadData({ searchTerm: searchText }));
     });
-  }
-
-  loadNews(): void {
-    this.store.dispatch(NewsActions.loadData({ searchTerm: '' }));
   }
 }

@@ -31,16 +31,10 @@ export class NasaGalleryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
-
     this.searchService.searchTerm$.subscribe((searchText) => {
       this.store.dispatch(
         NasaGalleryActions.loadData({ searchTerm: searchText })
       );
     });
-  }
-
-  loadData(): void {
-    this.store.dispatch(NasaGalleryActions.loadData({ searchTerm: '' }));
   }
 }

@@ -1,19 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
+import { BehaviorSubject, debounceTime } from 'rxjs';
+import { searchPause } from '../shared/constants';
 @Injectable({
   providedIn: 'root',
 })
 export class SearchService {
   private _searchTerm = new BehaviorSubject<string>('');
-  searchTerm$ = this._searchTerm.asObservable();
-
-  private searchSubject = new Subject<string>();
-
-  constructor() {
-    this.searchSubject.pipe(debounceTime(730)).subscribe((searchText) => {
-      this._searchTerm.next(searchText);
-    });
-  }
+  searchTerm$ = this._searchTerm.asObservable().pipe(debounceTime(searchPause));
+  constructor() {}
 
   setSearchTerm(term: string) {
     this._searchTerm.next(term);

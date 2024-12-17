@@ -11,12 +11,13 @@ import {
   errorUrlNews,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { ErrorService } from '../error.service';
 import { NewsCache } from '../models/cache/news-cache.model';
 import { convertDateToString, isISO8601Date } from '../shared/date-functions';
+import { NewsModel } from '../models/news/news.model';
 
 @Injectable({
   providedIn: 'root',
@@ -32,28 +33,11 @@ export class NewsSearchService {
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search() {
+  search(): Observable<NewsModel[]> {
     let term = this.searchService.getSearchTerm();
 
     if (!term || term.length < minSymbolsToTriggerSearch) {
-      return of([]);
-    }
-
-    let cache = this.cacheService.get(PAGE_KEYS.NEWS, term) as NewsCache;
-
-    if (cache) {
-      this.promptService.NewsNext = cache.nextUrl;
-      this.promptService.NewsPrev = cache.prevUrl;
-      return of(cache);
-    }
-
-    let defaultCache = this.cacheService.get(
-      PAGE_KEYS.NEWS,
-      DEFAULT_CACHE_KEYS.NEWS
-    );
-
-    if (!defaultCache) {
-      return of([]);
+      return of([] as NewsModel[]);
     }
 
     const { property, value } = parseSearchTerm(term);
@@ -115,7 +99,7 @@ export class NewsSearchService {
             return this.apiCall(urlP);
           }
         }
-        return of([]);
+        return of([] as NewsModel[]);
       case 'pb':
         let urlPb = this.urlBuilder.getNewsUrl(
           undefined,
@@ -129,21 +113,21 @@ export class NewsSearchService {
         let urlPa = this.urlBuilder.getNewsUrl(undefined, undefined, value);
         return this.apiCall(urlPa);
       default:
-        return of([]);
+        return of([] as NewsModel[]);
     }
   }
 
-  private apiCall(url: string) {
+  private apiCall(url: string): Observable<NewsModel[]> {
     return this.dataService.getNews(url).pipe(
       map((responseData) => {
         if (responseData.count == 0) {
-          return of([]);
+          return [];
         }
 
         this.promptService.NewsNext = responseData.next;
         this.promptService.NewsPrev = responseData.previous;
 
-        return of(responseData.results);
+        return responseData.results;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
@@ -151,7 +135,7 @@ export class NewsSearchService {
           state: { returnUrl: errorUrlNews },
         });
 
-        return of([]);
+        return [];
       })
     );
   }

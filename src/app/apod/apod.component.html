@@ -1,7 +1,5 @@
 <app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
 <div *ngIf="data$ | async as data">
-  <div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
-
   <section class="container content" *ngIf="data.length > 0">
     <article *ngFor="let item of data | dataSort : 'date'">
       <div class="apod-image-card" *ngIf="item.url && item.title">

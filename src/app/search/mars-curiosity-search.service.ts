@@ -7,8 +7,6 @@ import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
 import {
   errorMessageDataFetch,
-  errorUrl,
-  errorUrlMarsCuriosity,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
 import { catchError, map, Observable, of } from 'rxjs';
@@ -21,6 +19,7 @@ import {
 } from '../models/mars/rover.cameras';
 import { isISO8601Date } from '../shared/date-functions';
 import { MarsModel } from '../models/mars/mars.model';
+import { ROUTES } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
@@ -116,8 +115,8 @@ export class MarsCuriositySearchService {
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([errorUrl], {
-          state: { returnUrl: errorUrlMarsCuriosity },
+        this.router.navigate([ROUTES.error], {
+          state: { returnUrl: ROUTES.marsCuriosity },
         });
 
         return [];
@@ -150,8 +149,8 @@ export class MarsCuriositySearchService {
         }),
         catchError(() => {
           this.errorService.sendError(errorMessageDataFetch);
-          this.router.navigate([errorUrl], {
-            state: { returnUrl: errorUrlMarsCuriosity },
+          this.router.navigate([ROUTES.error], {
+            state: { returnUrl: ROUTES.marsCuriosity },
           });
 
           return [];

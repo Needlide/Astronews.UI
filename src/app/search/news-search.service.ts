@@ -6,8 +6,6 @@ import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
 import {
   errorMessageDataFetch,
-  errorUrl,
-  errorUrlNews,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
 import { catchError, map, Observable, of } from 'rxjs';
@@ -16,6 +14,7 @@ import { parseSearchTerm, parseSearchValue } from './search.util';
 import { ErrorService } from '../error.service';
 import { convertDateToString, isISO8601Date } from '../shared/date-functions';
 import { NewsModel } from '../models/news/news.model';
+import { ROUTES } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
@@ -151,8 +150,8 @@ export class NewsSearchService {
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([errorUrl], {
-          state: { returnUrl: errorUrlNews },
+        this.router.navigate([ROUTES.error], {
+          state: { returnUrl: ROUTES.news },
         });
 
         return [];

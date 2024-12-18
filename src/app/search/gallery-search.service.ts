@@ -1,22 +1,18 @@
 import { Injectable } from '@angular/core';
 import { CachingService } from '../cache/caching.service';
-import { SearchService } from './search.service';
 import { DataService } from '../data.service';
 import {
   errorMessageDataFetch,
-  errorUrl,
-  errorUrlGallery,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { catchError, map, Observable, of } from 'rxjs';
-import { GalleryCache } from '../models/cache/gallery-cache.model';
-import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
 import { Data } from '../models/gallery/gallery.root.model';
+import { ROUTES } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
@@ -24,9 +20,7 @@ import { Data } from '../models/gallery/gallery.root.model';
 export class GallerySearchService {
   constructor(
     private cacheService: CachingService,
-    private searchService: SearchService,
     private dataService: DataService,
-    private promptService: PromptService,
     private errorService: ErrorService,
     private router: Router,
     private urlBuilder: UrlBuilderService
@@ -155,8 +149,8 @@ export class GallerySearchService {
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([errorUrl], {
-          state: { returnUrl: errorUrlGallery },
+        this.router.navigate([ROUTES.error], {
+          state: { returnUrl: ROUTES.nasaGallery },
         });
 
         return [];

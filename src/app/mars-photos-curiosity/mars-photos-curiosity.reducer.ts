@@ -4,14 +4,12 @@ import { MarsCuriosityActions } from './mars-photos-curiosity.actions';
 
 export interface MarsCuriosityState {
   data: MarsModel[];
-  maxSol: number;
   isLoading: boolean;
   error: string | null;
 }
 
 export const initialState: MarsCuriosityState = {
   data: [],
-  maxSol: 0,
   isLoading: false,
   error: null,
 };
@@ -23,10 +21,9 @@ export const marsCuriosityReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  on(MarsCuriosityActions.loadDataSuccess, (state, { data, maxSol }) => ({
+  on(MarsCuriosityActions.loadDataSuccess, (state, { data }) => ({
     ...state,
-    data: [...state.data, ...data],
-    maxSol: maxSol,
+    data: data,
     isLoading: false,
     error: null,
   })),

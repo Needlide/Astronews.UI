@@ -9,11 +9,6 @@ export const selectMarsCuriosityData = createSelector(
   (state) => state.data
 );
 
-export const selectMarsCuriosityMaxSol = createSelector(
-  selectMarsCuriosityState,
-  (state) => state.maxSol
-);
-
 export const selectMarsCuriosityIsLoading = createSelector(
   selectMarsCuriosityState,
   (state) => state.isLoading

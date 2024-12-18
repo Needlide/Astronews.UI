@@ -12,6 +12,7 @@ import {
 } from './apod.selectors';
 import { ApodActions } from './apod.actions';
 import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
+import { SearchService } from '../search/search.service';
 
 @Component({
   selector: 'app-apod',
@@ -25,7 +26,8 @@ export class APODComponent implements OnInit {
 
   constructor(
     private store: Store<ApodState>,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private searchService: SearchService
   ) {}
 
   ngOnInit(): void {
@@ -35,13 +37,16 @@ export class APODComponent implements OnInit {
   loadData(): void {
     let endDate = new Date();
     let startDate = subtractMonthFromDate(endDate);
-    this.store.dispatch(
-      ApodActions.loadData({
-        startDate: startDate,
-        endDate: endDate,
-        cacheKey: DEFAULT_CACHE_KEYS.APOD,
-      })
-    );
+
+    this.searchService.searchTerm$.subscribe((searchText) => {
+      this.store.dispatch(
+        ApodActions.loadData({
+          startDate: startDate,
+          endDate: endDate,
+          searchTerm: searchText,
+        })
+      );
+    });
   }
 
   isYouTubeLink(url: string): boolean {

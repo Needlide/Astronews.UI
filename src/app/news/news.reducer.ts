@@ -4,16 +4,12 @@ import { NewsModel } from '../models/news/news.model';
 
 export interface NewsState {
   data: NewsModel[];
-  nextUrl: string;
-  prevUrl: string;
   isLoading: boolean;
   error: string | null;
 }
 
 export const initialState: NewsState = {
   data: [],
-  nextUrl: '',
-  prevUrl: '',
   isLoading: false,
   error: null,
 };
@@ -25,11 +21,9 @@ export const newsReducer = createReducer(
     isLoading: true,
     error: null,
   })),
-  on(NewsActions.loadDataSuccess, (state, { data, nextUrl, prevUrl }) => ({
+  on(NewsActions.loadDataSuccess, (state, { data }) => ({
     ...state,
-    data: [...state.data, ...data],
-    nextUrl,
-    prevUrl,
+    data: data,
     isLoading: false,
     error: null,
   })),

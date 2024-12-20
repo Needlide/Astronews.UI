@@ -23,7 +23,7 @@ export const nasaGalleryReducer = createReducer(
   })),
   on(NasaGalleryActions.loadDataSuccess, (state, { data }) => ({
     ...state,
-    data: [...state.data, ...data],
+    data: data,
     isLoading: false,
     error: null,
   })),

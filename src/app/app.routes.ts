@@ -3,4 +3,5 @@ export const ROUTES = {
   marsCuriosity: '/mars/curiosity',
   nasaGallery: '/gallery',
   apod: '/apod',
+  error: '/error',
 };

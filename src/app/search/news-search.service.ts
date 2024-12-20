@@ -1,22 +1,20 @@
 import { Injectable } from '@angular/core';
 import { CachingService } from '../cache/caching.service';
-import { SearchService } from './search.service';
 import { DataService } from '../data.service';
 import { PromptService } from '../shared/prompt.service';
 import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
 import {
   errorMessageDataFetch,
-  errorUrl,
-  errorUrlNews,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { ErrorService } from '../error.service';
-import { NewsCache } from '../models/cache/news-cache.model';
 import { convertDateToString, isISO8601Date } from '../shared/date-functions';
+import { NewsModel } from '../models/news/news.model';
+import { ROUTES } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +22,6 @@ import { convertDateToString, isISO8601Date } from '../shared/date-functions';
 export class NewsSearchService {
   constructor(
     private cacheService: CachingService,
-    private searchService: SearchService,
     private dataService: DataService,
     private promptService: PromptService,
     private router: Router,
@@ -32,28 +29,25 @@ export class NewsSearchService {
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search() {
-    let term = this.searchService.getSearchTerm();
-
+  search(term: string): Observable<NewsModel[]> {
     if (!term || term.length < minSymbolsToTriggerSearch) {
-      return of([]);
+      let defaultCache = this.cacheService.get(
+        PAGE_KEYS.NEWS,
+        DEFAULT_CACHE_KEYS.NEWS
+      ) as NewsModel[];
+
+      if (defaultCache) {
+        return of(defaultCache);
+      } else {
+        let defaultUrl = this.urlBuilder.getNewsUrl();
+        return this.apiCall(defaultUrl, DEFAULT_CACHE_KEYS.NEWS);
+      }
     }
 
-    let cache = this.cacheService.get(PAGE_KEYS.NEWS, term) as NewsCache;
+    let cache = this.cacheService.get(PAGE_KEYS.NEWS, term) as NewsModel[];
 
     if (cache) {
-      this.promptService.NewsNext = cache.nextUrl;
-      this.promptService.NewsPrev = cache.prevUrl;
       return of(cache);
-    }
-
-    let defaultCache = this.cacheService.get(
-      PAGE_KEYS.NEWS,
-      DEFAULT_CACHE_KEYS.NEWS
-    );
-
-    if (!defaultCache) {
-      return of([]);
     }
 
     const { property, value } = parseSearchTerm(term);
@@ -70,13 +64,13 @@ export class NewsSearchService {
           parseSearchValue(value)
         );
 
-        return this.apiCall(urlT);
+        return this.apiCall(urlT, term);
       case 'ns':
         let urlNs = this.urlBuilder.getNewsUrl(
           undefined,
           parseSearchValue(value)
         );
-        return this.apiCall(urlNs);
+        return this.apiCall(urlNs, term);
       case 's':
         let urlS = this.urlBuilder.getNewsUrl(
           undefined,
@@ -86,7 +80,7 @@ export class NewsSearchService {
           undefined,
           parseSearchValue(value)
         );
-        return this.apiCall(urlS);
+        return this.apiCall(urlS, term);
       case 'p':
         let dates = parseSearchValue(value);
         if (
@@ -104,7 +98,7 @@ export class NewsSearchService {
               convertDateToString(firstDate),
               convertDateToString(secondDate)
             );
-            return this.apiCall(urlP);
+            return this.apiCall(urlP, term);
           } else {
             let urlP = this.urlBuilder.getNewsUrl(
               undefined,
@@ -112,10 +106,10 @@ export class NewsSearchService {
               convertDateToString(firstDate),
               convertDateToString(secondDate)
             );
-            return this.apiCall(urlP);
+            return this.apiCall(urlP, term);
           }
         }
-        return of([]);
+        return of([] as NewsModel[]);
       case 'pb':
         let urlPb = this.urlBuilder.getNewsUrl(
           undefined,
@@ -124,34 +118,43 @@ export class NewsSearchService {
           value
         );
 
-        return this.apiCall(urlPb);
+        return this.apiCall(urlPb, term);
       case 'pa':
         let urlPa = this.urlBuilder.getNewsUrl(undefined, undefined, value);
-        return this.apiCall(urlPa);
+        return this.apiCall(urlPa, term);
       default:
-        return of([]);
+        let urlSearchDefault = this.urlBuilder.getNewsUrl(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          value
+        );
+        return this.apiCall(urlSearchDefault, DEFAULT_CACHE_KEYS.NEWS);
     }
   }
 
-  private apiCall(url: string) {
+  private apiCall(url: string, key: string): Observable<NewsModel[]> {
     return this.dataService.getNews(url).pipe(
       map((responseData) => {
         if (responseData.count == 0) {
-          return of([]);
+          return [];
         }
 
         this.promptService.NewsNext = responseData.next;
         this.promptService.NewsPrev = responseData.previous;
 
-        return of(responseData.results);
+        this.cacheService.set(PAGE_KEYS.NEWS, key, responseData.results);
+
+        return responseData.results;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([errorUrl], {
-          state: { returnUrl: errorUrlNews },
+        this.router.navigate([ROUTES.error], {
+          state: { returnUrl: ROUTES.news },
         });
 
-        return of([]);
+        return [];
       })
     );
   }

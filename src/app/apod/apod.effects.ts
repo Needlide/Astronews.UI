@@ -3,23 +3,42 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { DataService } from '../data.service';
 import { CachingService } from '../cache/caching.service';
 import { ApodActions } from './apod.actions';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { ApodCache } from '../models/cache/apod-cache.model';
 import {
   subtractDayFromDate,
   subtractMonthFromDate,
 } from '../shared/date-functions';
+import { ApodSearchService } from '../search/apod-search.service';
 
 @Injectable()
 export class ApodEffects {
   constructor(
     private actions$: Actions,
+    private searchService: ApodSearchService,
     private dataService: DataService,
     private cacheService: CachingService
   ) {}
 
   loadData$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ApodActions.loadData),
+      mergeMap((action) =>
+        this.searchService
+          .search(action.startDate, action.endDate, action.searchTerm)
+          .pipe(
+            map((data) => {
+              console.log(data);
+              return ApodActions.loadDataSuccess({ data });
+            }),
+            catchError((error) => of(ApodActions.loadDataFailure({ error })))
+          )
+      )
+    )
+  );
+
+  /*loadData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ApodActions.loadData),
       switchMap((action) => {
@@ -84,5 +103,5 @@ export class ApodEffects {
         }
       })
     )
-  );
+  );*/
 }

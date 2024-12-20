@@ -1,4 +1,4 @@
-export interface RoverCameraModel{
-    name: string;
-    full_name: string;
+export interface RoverCameraModel {
+  name: string;
+  full_name: string;
 }

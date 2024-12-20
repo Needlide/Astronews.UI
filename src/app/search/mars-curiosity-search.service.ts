@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { CachingService } from '../cache/caching.service';
-import { SearchService } from './search.service';
 import { DataService } from '../data.service';
 import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
@@ -8,11 +7,9 @@ import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
 import {
   errorMessageDataFetch,
-  errorUrl,
-  errorUrlMarsCuriosity,
   minSymbolsToTriggerSearch,
 } from '../shared/constants';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
 import { parseSearchTerm, parseSearchValue } from './search.util';
 import { Rovers } from '../models/mars/rovers';
@@ -21,6 +18,8 @@ import {
   MarsRoverCameras,
 } from '../models/mars/rover.cameras';
 import { isISO8601Date } from '../shared/date-functions';
+import { MarsModel } from '../models/mars/mars.model';
+import { ROUTES } from '../app.routes';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +27,6 @@ import { isISO8601Date } from '../shared/date-functions';
 export class MarsCuriositySearchService {
   constructor(
     private cacheService: CachingService,
-    private searchService: SearchService,
     private dataService: DataService,
     private promptService: PromptService,
     private errorService: ErrorService,
@@ -36,11 +34,18 @@ export class MarsCuriositySearchService {
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search() {
-    let term = this.searchService.getSearchTerm();
-
+  search(term: string): Observable<MarsModel[]> {
     if (!term || term.length < minSymbolsToTriggerSearch) {
-      return of([]);
+      let defaultCache = this.cacheService.get(
+        PAGE_KEYS.MARS_CURIOSITY,
+        DEFAULT_CACHE_KEYS.MARS_CURIOSITY
+      ) as MarsModel[];
+
+      if (defaultCache) {
+        return of(defaultCache);
+      } else {
+        return this.apiCallLatest();
+      }
     }
 
     let cache = this.cacheService.get(PAGE_KEYS.MARS_CURIOSITY, term);
@@ -49,18 +54,8 @@ export class MarsCuriositySearchService {
       return of(cache);
     }
 
-    let defaultCache = this.cacheService.get(
-      PAGE_KEYS.MARS_CURIOSITY,
-      DEFAULT_CACHE_KEYS.MARS_CURIOSITY
-    );
-
-    if (!defaultCache) {
-      return of([]);
-    }
-
     const { property, value } = parseSearchTerm(term);
 
-    // TODO dispatch action to the caching service so the data received from API call could be cached
     switch (property?.toLowerCase()) {
       case 's':
         const valueSign = parseSearchValue(value);
@@ -100,11 +95,12 @@ export class MarsCuriositySearchService {
     }
   }
 
-  private apiCall(url: string, key: string) {
+  private apiCall(url: string, key: string): Observable<MarsModel[]> {
     return this.dataService.getMarsPhotos(url).pipe(
       map((responseData) => {
-        if (responseData.photos.length == 0) {
-          return of([]);
+        //TODO `responseData.photos` is undefined (could be just `responseData`)
+        if (!responseData || responseData.photos.length == 0) {
+          return [];
         }
 
         const data = responseData.photos;
@@ -113,17 +109,53 @@ export class MarsCuriositySearchService {
         // so the page knows new starting point for pagination
         this.promptService.MarsCuriosityCurrentSol = data[0].sol;
 
-        return of(data);
+        this.cacheService.set(PAGE_KEYS.MARS_CURIOSITY, key, data);
+
+        return data;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([errorUrl], {
-          state: { returnUrl: errorUrlMarsCuriosity },
+        this.router.navigate([ROUTES.error], {
+          state: { returnUrl: ROUTES.marsCuriosity },
         });
 
-        return of([]);
+        return [];
       })
     );
+  }
+
+  private apiCallLatest(): Observable<MarsModel[]> {
+    return this.dataService
+      .getMarsLatestPhotos(this.urlBuilder.getMarsLatestUrl(Rovers.Curiosity))
+      .pipe(
+        map((responseData) => {
+          if (!responseData || responseData.latest_photos.length == 0) {
+            return [];
+          }
+
+          const data = responseData.latest_photos;
+
+          // updating the current sol variable with the new value
+          // so the page knows new starting point for pagination
+          this.promptService.MarsCuriosityCurrentSol = data[0].sol;
+
+          this.cacheService.set(
+            PAGE_KEYS.MARS_CURIOSITY,
+            DEFAULT_CACHE_KEYS.MARS_CURIOSITY,
+            data
+          );
+
+          return data;
+        }),
+        catchError(() => {
+          this.errorService.sendError(errorMessageDataFetch);
+          this.router.navigate([ROUTES.error], {
+            state: { returnUrl: ROUTES.marsCuriosity },
+          });
+
+          return [];
+        })
+      );
   }
 
   // map enum of the camera names to the user's input

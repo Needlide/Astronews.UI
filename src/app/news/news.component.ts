@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NewsModel } from '../models/news/news.model';
-import { UrlBuilderService } from '../url-builder.service';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { NewsActions } from './news.actions';
 import { NewsState } from './news.reducer';
 import {
@@ -10,7 +9,7 @@ import {
   selectNewsLoading,
   selectNewsError,
 } from './news.selectors';
-import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
+import { SearchService } from '../search/search.service';
 
 @Component({
   selector: 'app-news',
@@ -21,21 +20,15 @@ export class NewsComponent implements OnInit {
   data$: Observable<NewsModel[]> = this.store.select(selectNewsData);
   isLoading$: Observable<boolean> = this.store.select(selectNewsLoading);
   error$: Observable<string | null> = this.store.select(selectNewsError);
-  noData = [];
 
   constructor(
     private store: Store<NewsState>,
-    private urlBuilder: UrlBuilderService
+    private searchService: SearchService
   ) {}
 
   ngOnInit(): void {
-    this.loadNews();
-  }
-
-  loadNews(): void {
-    const url = this.urlBuilder.getNewsUrl();
-    this.store.dispatch(
-      NewsActions.loadData({ url: url, cacheKey: DEFAULT_CACHE_KEYS.NEWS })
-    );
+    this.searchService.searchTerm$.subscribe((searchText) => {
+      this.store.dispatch(NewsActions.loadData({ searchTerm: searchText }));
+    });
   }
 }

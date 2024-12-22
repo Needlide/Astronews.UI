@@ -35,6 +35,7 @@ import { MarsCuriosityEffects } from './mars-photos-curiosity/mars-photos-curios
 import { NasaGalleryEffects } from './nasa-gallery/nasa-gallery.effects';
 import { ApodEffects } from './apod/apod.effects';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
+import { PaginationComponent } from './pagination/pagination.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
     AboutComponent,
   ],
   imports: [
+    PaginationComponent,
     LoadingSpinnerComponent,
     BrowserModule,
     FormsModule,

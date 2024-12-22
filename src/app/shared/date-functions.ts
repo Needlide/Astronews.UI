@@ -55,3 +55,17 @@ export function addMonthToDate(date: Date): Date {
   dateLocal.setMonth(dateLocal.getMonth() + 1);
   return dateLocal;
 }
+
+/**
+ * Adds one day to the provided Date object and returns the modified date.
+ *
+ * This function creates a new Date object from the input, adds one day, and returns the modified Date object.
+ *
+ * @param {Date} date - The Date object to which one day will be added.
+ * @returns {Date} A new Date object representing the date one day later than the input.
+ */
+export function addDayToDate(date: Date): Date {
+  let dateLocal = new Date(date);
+  dateLocal.setDate(dateLocal.getDate() + 1);
+  return dateLocal;
+}

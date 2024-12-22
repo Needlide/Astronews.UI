@@ -1,0 +1,30 @@
+<div class="pagination-controls">
+  @if (displayItemsPerPage) {
+  <div class="items-per-page">
+    <label for="itemsPerPage">Items per page:</label>
+    <select id="itemsPerPage" [(ngModel)]="selectedItemsPerPage">
+      <option *ngFor="let option of itemsPerPage" [value]="option">
+        {{ option }}
+      </option>
+    </select>
+  </div>
+  }
+
+  <div class="pagination">
+    <button
+      class="prev-page-btn"
+      (click)="changePage(currentPage - 1)"
+      [disabled]="currentPage === 1"
+    >
+      Previous
+    </button>
+    <span>{{ currentPage }} / {{ totalPages }}</span>
+    <button
+      class="next-page-btn"
+      (click)="changePage(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+    >
+      Next
+    </button>
+  </div>
+</div>

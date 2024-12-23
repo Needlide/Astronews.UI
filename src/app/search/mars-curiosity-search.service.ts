@@ -98,7 +98,6 @@ export class MarsCuriositySearchService {
   private apiCall(url: string, key: string): Observable<MarsModel[]> {
     return this.dataService.getMarsPhotos(url).pipe(
       map((responseData) => {
-        //TODO `responseData.photos` is undefined (could be just `responseData`)
         if (!responseData || responseData.photos.length == 0) {
           return [];
         }

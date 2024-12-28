@@ -6,7 +6,7 @@
   <section class="container content">
     @for (item of data | dataSort : 'date'; track $index) {
     <article>
-      @if (item.url && item.title) {
+      @if (item.url && item.title && item.explanation) {
       <div class="apod-image-card">
         <h2 class="image-title">{{ item.title }}</h2>
         <p class="image-explanation">{{ item.explanation }}</p>
@@ -25,9 +25,11 @@
         }
 
         <div>
+          @if (item.copyright) {
           <p class="image-copyright">{{ item.copyright }}</p>
+          } @if (item.date) {
           <p class="image-date">{{ item.date }}</p>
-          @if (!isYouTubeLink(item.url) && item.hdurl) {
+          } @if (!isYouTubeLink(item.url) && item.hdurl) {
           <a class="hd-link" [href]="item.hdurl" target="_blank"> HD image </a>
           }
         </div>

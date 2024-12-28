@@ -1,11 +1,18 @@
-<app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
-<div *ngIf="data$ | async as data">
-  <section class="container content" *ngIf="data.length > 0">
-    <article *ngFor="let item of data | dataSort : 'date'">
-      <div class="apod-image-card" *ngIf="item.url && item.title">
+@if (isLoading$ | async) {
+<app-loading-spinner></app-loading-spinner>
+} @if (data$ | async; as data) {
+<div>
+  @if (data.length > 0) {
+  <section class="container content">
+    @for (item of data | dataSort : 'date'; track $index) {
+    <article>
+      @if (item.url && item.title) {
+      <div class="apod-image-card">
         <h2 class="image-title">{{ item.title }}</h2>
         <p class="image-explanation">{{ item.explanation }}</p>
-        <div class="video-container" *ngIf="isYouTubeLink(item.url)">
+
+        @if (isYouTubeLink(item.url)) {
+        <div class="video-container">
           <iframe
             [src]="getSafeUrl(item.url)"
             allowfullscreen="true"
@@ -13,19 +20,28 @@
             frameborder="0"
           ></iframe>
         </div>
-        <img class="image" *ngIf="!isYouTubeLink(item.url)" [src]="item.url" />
+        } @else {
+        <img class="image" [src]="item.url" />
+        }
+
         <div>
           <p class="image-copyright">{{ item.copyright }}</p>
           <p class="image-date">{{ item.date }}</p>
-          <a
-            class="hd-link"
-            *ngIf="!isYouTubeLink(item.url)"
-            [href]="item.hdurl"
-            target="_blank"
-            >HD image</a
-          >
+          @if (!isYouTubeLink(item.url) && item.hdurl) {
+          <a class="hd-link" [href]="item.hdurl" target="_blank"> HD image </a>
+          }
         </div>
       </div>
+      }
     </article>
+    }
+
+    <app-pagination
+      [displayItemsPerPage]="false"
+      [totalItems]="totalItems"
+      (pageChanged)="pageChanged($event)"
+    />
   </section>
+  }
 </div>
+}

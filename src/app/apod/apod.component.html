@@ -1,4 +1,4 @@
-@if (isLoading$ | async) {
+@if (isLoading$ | async; as isLoading) {
 <app-loading-spinner></app-loading-spinner>
 } @if (data$ | async; as data) {
 <div>
@@ -44,6 +44,12 @@
       (pageChanged)="pageChanged($event)"
     />
   </section>
-  }
+  } @else { @if (error$ | async; as error) {
+  <div class="error-message">
+    <p>Error: {{ error }}</p>
+  </div>
+  } @else { @if (!(isLoading$ | async)) {
+  <div class="error-message">No data available.</div>
+  } } }
 </div>
 }

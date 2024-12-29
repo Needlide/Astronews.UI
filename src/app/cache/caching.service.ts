@@ -16,7 +16,7 @@ export class CachingService {
    * @param value Value which needs to be cached.
    * @param ttl Optional parameter Time-To-Live in milliseconds. Default value is 600_000 (10 minutes).
    */
-  set(page: string, key: string, value: any, ttl: number = 600000): void {
+  set(page: string, key: string, value: any, ttl: number = 600_000): void {
     const pageCache = this.cache.get(page) || new Map<string, any>();
     const expiry = Date.now() + ttl;
     pageCache.set(key, { value, expiry });

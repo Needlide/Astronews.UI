@@ -13,10 +13,10 @@ export class PaginationComponent {
   @Input() displayItemsPerPage: boolean = true;
   @Input() totalItems: number = 0;
   @Output() pageChanged: EventEmitter<number> = new EventEmitter();
-  @Output() currentPage: number = 1;
 
   public itemsPerPage: number[] = [15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
   public selectedItemsPerPage: number = 30;
+  public currentPage: number = 1;
 
   get totalPages(): number {
     return Math.ceil(this.totalItems / this.selectedItemsPerPage);

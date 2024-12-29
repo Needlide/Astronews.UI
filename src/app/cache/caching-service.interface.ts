@@ -1,9 +1,4 @@
 export interface ICachingService<T> {
-  // key - page number, value - page's data
-  paginationCache: Map<number, T>;
-  // key - page number, value - (key - search term, value - search data)
-  searchCache: Map<number, Map<string, T>>;
-
   setPagination(page: number, value: T, ttl: number): void;
 
   setSearch(page: number, key: string, value: T, ttl: number): void;

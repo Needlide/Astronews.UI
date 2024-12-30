@@ -3,7 +3,7 @@ export function parseSearchTerm(term: string) {
   if (parts.length > 1) {
     return { property: parts[0], value: parts[1] };
   } else {
-    return { property: null, value: parts[0] };
+    return { property: undefined, value: parts[0] };
   }
 }
 

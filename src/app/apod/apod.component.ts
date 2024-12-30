@@ -1,18 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { ApodModel } from '../models/apod/apod.model';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Observable, of } from 'rxjs';
-import { subtractMonthFromDate } from '../shared/date-functions';
+import { map, Observable, switchMap, take } from 'rxjs';
+import {
+  addDayToDate,
+  addMonthToDate,
+  subtractMonthFromDate,
+} from '../shared/date-functions';
 import { Store } from '@ngrx/store';
 import { ApodState } from './apod.reducer';
 import {
   selectApodData,
   selectApodError,
   selectApodLoading,
+  selectApodPage,
+  selectApodTotalItems,
 } from './apod.selectors';
 import { ApodActions } from './apod.actions';
-import { DEFAULT_CACHE_KEYS } from '../cache/cache-keys';
 import { SearchService } from '../search/search.service';
+import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
   selector: 'app-apod',
@@ -20,9 +26,13 @@ import { SearchService } from '../search/search.service';
   styleUrls: ['./apod.component.scss'],
 })
 export class APODComponent implements OnInit {
-  data$: Observable<ApodModel[]> = this.store.select(selectApodData) ?? of([]);
+  data$: Observable<ApodModel[]> = this.store.select(selectApodData);
   isLoading$: Observable<boolean> = this.store.select(selectApodLoading);
   error$: Observable<string | null> = this.store.select(selectApodError);
+  currentPage$: Observable<number> = this.store.select(selectApodPage);
+  totalItems$: Observable<number> = this.store.select(selectApodTotalItems);
+
+  private readonly firstDateForApod = new Date('Jun 16, 1995');
 
   constructor(
     private store: Store<ApodState>,
@@ -31,19 +41,73 @@ export class APODComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.store.dispatch(ApodActions.calculateTotalItems());
+
     this.loadData();
+
+    this.searchService.searchTerm$
+      .pipe(
+        switchMap((searchText) =>
+          this.currentPage$.pipe(
+            take(1),
+            map((currentPage) => ({ searchText, currentPage }))
+          )
+        )
+      )
+      .subscribe(({ searchText, currentPage }) => {
+        if (searchText && searchText.length > minSymbolsToTriggerSearch) {
+          this.store.dispatch(
+            ApodActions.initiateSearch({
+              searchTerm: searchText,
+              cacheKey: searchText,
+              pageNumber: currentPage,
+            })
+          );
+        } else if (!searchText) {
+          this.store.dispatch(
+            ApodActions.loadPageFromCache({ pageNumber: currentPage })
+          );
+        }
+      });
   }
 
-  loadData(): void {
-    let endDate = new Date();
-    let startDate = subtractMonthFromDate(endDate);
+  private loadData(): void {
+    this.currentPage$.pipe(take(1)).subscribe((currentPage) => {
+      let endDate = new Date();
+      let startDate = subtractMonthFromDate(endDate);
 
-    this.searchService.searchTerm$.subscribe((searchText) => {
       this.store.dispatch(
         ApodActions.loadData({
           startDate: startDate,
           endDate: endDate,
-          searchTerm: searchText,
+          pageNumber: currentPage,
+        })
+      );
+    });
+  }
+
+  pageChanged(page: number): void {
+    let endDate = new Date();
+    let startDate = subtractMonthFromDate(endDate);
+
+    for (let i = 0; i < page; i++) {
+      endDate = subtractMonthFromDate(endDate);
+      startDate = subtractMonthFromDate(startDate);
+    }
+
+    if (startDate < this.firstDateForApod) {
+      startDate = new Date(this.firstDateForApod);
+      endDate = addMonthToDate(this.firstDateForApod);
+    }
+
+    this.store.dispatch(ApodActions.changeCurrentPage({ currentPage: page }));
+
+    this.currentPage$.pipe(take(1)).subscribe((currentPage) => {
+      this.store.dispatch(
+        ApodActions.loadData({
+          startDate: addDayToDate(startDate),
+          endDate: addDayToDate(endDate),
+          pageNumber: currentPage,
         })
       );
     });

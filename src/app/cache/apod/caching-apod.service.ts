@@ -6,7 +6,7 @@ import { ApodCache } from '@/app/models/cache/apod-cache.model';
 @Injectable({
   providedIn: 'root',
 })
-export class CachingServiceApodService implements ICachingService<ApodModel[]> {
+export class CachingApodService implements ICachingService<ApodModel[]> {
   constructor() {}
 
   // key - page number, value - page's data

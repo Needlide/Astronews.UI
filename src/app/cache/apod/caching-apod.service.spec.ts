@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { CachingServiceApodService } from './caching-service-apod.service';
+import { CachingApodService } from './caching-apod.service';
 
 describe('CachingServiceApodService', () => {
-  let service: CachingServiceApodService;
+  let service: CachingApodService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(CachingServiceApodService);
+    service = TestBed.inject(CachingApodService);
   });
 
   it('should be created', () => {

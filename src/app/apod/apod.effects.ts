@@ -1,24 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { DataService } from '../data.service';
-import { CachingService } from '../cache/caching.service';
 import { ApodActions } from './apod.actions';
-import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
-import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
-import { ApodCache } from '../models/cache/apod-cache.model';
-import {
-  subtractDayFromDate,
-  subtractMonthFromDate,
-} from '../shared/date-functions';
+import { catchError, map, mergeMap, of } from 'rxjs';
 import { ApodSearchService } from '../search/apod-search.service';
+import { subtractDayFromDate } from '../shared/date-functions';
 
 @Injectable()
 export class ApodEffects {
   constructor(
     private actions$: Actions,
-    private searchService: ApodSearchService,
-    private dataService: DataService,
-    private cacheService: CachingService
+    private searchService: ApodSearchService
   ) {}
 
   loadData$ = createEffect(() =>
@@ -26,10 +17,9 @@ export class ApodEffects {
       ofType(ApodActions.loadData),
       mergeMap((action) =>
         this.searchService
-          .search(action.startDate, action.endDate, action.searchTerm)
+          .load(action.startDate, action.endDate, action.pageNumber)
           .pipe(
             map((data) => {
-              console.log(data);
               return ApodActions.loadDataSuccess({ data });
             }),
             catchError((error) => of(ApodActions.loadDataFailure({ error })))
@@ -38,70 +28,54 @@ export class ApodEffects {
     )
   );
 
-  /*loadData$ = createEffect(() =>
+  initiateSearch$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ApodActions.loadData),
-      switchMap((action) => {
-        const cache = this.cacheService.get(
-          PAGE_KEYS.APOD,
-          DEFAULT_CACHE_KEYS.APOD
-        ) as ApodCache;
+      ofType(ApodActions.initiateSearch),
+      mergeMap((action) =>
+        this.searchService
+          .search(action.searchTerm, action.cacheKey, action.pageNumber)
+          .pipe(
+            map((data) => {
+              return ApodActions.initiateSearchSuccess({ data });
+            }),
+            catchError((error) =>
+              of(ApodActions.initiateSearchFailure({ error }))
+            )
+          )
+      )
+    )
+  );
 
-        if (cache) {
-          return of(
-            ApodActions.loadDataSuccess({
-              data: cache.data,
-              paginationValues: cache.paginationValues,
-            })
-          );
-        } else {
-          // subtract a day because the API doesn't update immediately
-          let modifiedStartDate = subtractDayFromDate(action.startDate);
-          let modifiedEndDate = subtractDayFromDate(action.endDate);
+  loadPageFromCache$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ApodActions.loadPageFromCache),
+      mergeMap((action) =>
+        this.searchService.loadPageFromCache(action.pageNumber).pipe(
+          map((data) => {
+            return ApodActions.loadPageFromCacheSuccess({ data });
+          }),
+          catchError((error) =>
+            of(ApodActions.loadPageFromCacheFailure({ error }))
+          )
+        )
+      )
+    )
+  );
 
-          return this.dataService
-            .getApods(modifiedStartDate, modifiedEndDate)
-            .pipe(
-              tap((response) => {
-                // subtract a month so the API returns data for a whole month
-                // subtract a day to not overlap the existing data with new from API
-                // (example: API returned data for 15.11 - 15.12 (dd-MM),
-                // and to not overlap data with 15.10 - 15.11 we subtract a day,
-                // so we get results for 14.10 - 14.11, without duplicating 15.11)
+  calculateTotalItems$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ApodActions.calculateTotalItems),
+      map(() => {
+        const currentDate = subtractDayFromDate(new Date());
+        const firstDateForApod = new Date('Jun 16, 1995');
+        const timeDifference =
+          currentDate.getTime() - firstDateForApod.getTime();
+        const daysDifference = timeDifference / (1000 * 3600 * 24);
 
-                let previousStartDate = subtractDayFromDate(
-                  subtractMonthFromDate(action.startDate)
-                );
-
-                let previousEndDate = subtractDayFromDate(
-                  subtractMonthFromDate(action.endDate)
-                );
-
-                const apodCache: ApodCache = {
-                  data: response,
-                  paginationValues: [
-                    { startDate: previousStartDate, endDate: previousEndDate },
-                  ],
-                };
-
-                this.cacheService.set(
-                  PAGE_KEYS.APOD,
-                  DEFAULT_CACHE_KEYS.APOD,
-                  apodCache
-                );
-              }),
-              map((response) =>
-                ApodActions.loadDataSuccess({
-                  data: response,
-                  paginationValues: [],
-                })
-              ),
-              catchError((error) =>
-                of(ApodActions.loadDataFailure({ error: error.message }))
-              )
-            );
-        }
+        return ApodActions.calculateTotalItemsSuccess({
+          totalItems: Math.floor(daysDifference),
+        });
       })
     )
-  );*/
+  );
 }

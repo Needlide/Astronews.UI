@@ -17,3 +17,13 @@ export const selectApodError = createSelector(
   selectApodState,
   (state) => state.error
 );
+
+export const selectApodPage = createSelector(
+  selectApodState,
+  (state) => state.page
+);
+
+export const selectApodTotalItems = createSelector(
+  selectApodState,
+  (state) => state.totalItems
+);

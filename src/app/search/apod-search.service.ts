@@ -37,7 +37,6 @@ export class ApodSearchService {
     let cache = this.cacheService.getPagination(pageNumber);
 
     if (cache) {
-      console.log('Returned cache from load for page number', pageNumber);
       return of(cache);
     }
 
@@ -50,17 +49,12 @@ export class ApodSearchService {
     pageNumber: number
   ): Observable<ApodModel[]> {
     let data$ = this.store.select(selectApodData);
-    console.log('Selected data to start search');
     return data$.pipe(
       take(1),
       switchMap((data) => {
         let cache = this.cacheService.getSearch(pageNumber, cacheKey);
 
         if (cache) {
-          console.log(
-            'Returned cache for search data for page number: ',
-            pageNumber
-          );
           return of(cache);
         }
 

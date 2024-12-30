@@ -191,7 +191,6 @@ export class UrlBuilderService {
     }
 
     if (sol !== '') {
-      console.log(sol);
       marsUrl += `?sol=${sol}`;
     }
 

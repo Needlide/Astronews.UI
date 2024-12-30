@@ -1,100 +1,137 @@
 import { Injectable } from '@angular/core';
-import { CachingService } from '../cache/caching.service';
-import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
+import { CachingApodService } from '../cache/apod/caching-apod.service';
 import { ApodModel } from '../models/apod/apod.model';
 import { parseSearchTerm } from './search.util';
 import {
+  errorMessageCacheRetrieve,
   errorMessageDataFetch,
-  minSymbolsToTriggerSearch,
 } from '../shared/constants';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, take } from 'rxjs';
 import { DataService } from '../data.service';
 import { subtractDayFromDate } from '../shared/date-functions';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { ROUTES } from '../app.routes';
+import { Store } from '@ngrx/store';
+import { selectApodData } from '../apod/apod.selectors';
+import { SearchError } from '../error/apod/search.error';
+import { CacheError } from '../error/apod/cache.error';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApodSearchService {
   constructor(
-    private cacheService: CachingService,
+    private cacheService: CachingApodService,
     private dataService: DataService,
     private errorService: ErrorService,
-    private router: Router
+    private router: Router,
+    private store: Store
   ) {}
 
-  search(
+  load(
     startDate: Date,
     endDate: Date,
-    term: string
+    pageNumber: number
   ): Observable<ApodModel[]> {
-    if (!term || term.length < minSymbolsToTriggerSearch) {
-      let defaultCache = this.cacheService.get(
-        PAGE_KEYS.APOD,
-        DEFAULT_CACHE_KEYS.APOD
-      ) as ApodModel[];
-
-      if (defaultCache) {
-        return of(defaultCache);
-      } else {
-        return this.apiCall(startDate, endDate);
-      }
-    }
-
-    let cache = this.cacheService.get(PAGE_KEYS.APOD, term) as ApodModel[];
+    let cache = this.cacheService.getPagination(pageNumber);
 
     if (cache) {
+      console.log('Returned cache from load for page number', pageNumber);
       return of(cache);
     }
 
-    let defaultCache = this.cacheService.get(
-      PAGE_KEYS.APOD,
-      DEFAULT_CACHE_KEYS.APOD
-    );
+    return this.apiCall(startDate, endDate, pageNumber);
+  }
 
-    if (!defaultCache) {
-      return of([]);
+  search(
+    searchTerm: string,
+    cacheKey: string,
+    pageNumber: number
+  ): Observable<ApodModel[]> {
+    let data$ = this.store.select(selectApodData);
+    console.log('Selected data to start search');
+    return data$.pipe(
+      take(1),
+      switchMap((data) => {
+        let cache = this.cacheService.getSearch(pageNumber, cacheKey);
+
+        if (cache) {
+          console.log(
+            'Returned cache for search data for page number: ',
+            pageNumber
+          );
+          return of(cache);
+        }
+
+        return this.searchLogic(searchTerm, data, cacheKey, pageNumber);
+      })
+    );
+  }
+
+  loadPageFromCache(pageNumber: number): Observable<ApodModel[]> {
+    let cache = this.cacheService.getPagination(pageNumber);
+
+    if (!cache) {
+      throw new CacheError(errorMessageCacheRetrieve, pageNumber);
     }
 
-    const { property, value } = parseSearchTerm(term);
+    return of(cache);
+  }
 
+  private searchLogic(
+    searchTerm: string,
+    data: ApodModel[],
+    cacheKey: string,
+    pageNumber: number
+  ): Observable<ApodModel[]> {
+    const { property, value } = parseSearchTerm(searchTerm);
+    // TODO t:Comet and t:comet result in two cache records, because cache treats them as two different keys
     switch (property?.toLowerCase()) {
       // filter by title
       case 't':
-        let t_filteredData = defaultCache.filter((item: ApodModel) =>
+        let t_filteredData = data.filter((item: ApodModel) =>
           item.title.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.set(PAGE_KEYS.APOD, term, t_filteredData);
+        this.cacheService.setSearch(pageNumber, cacheKey, t_filteredData);
         return of(t_filteredData);
       // filter by explanation
       case 'e':
-        let e_filteredData = defaultCache.filter((item: ApodModel) =>
+        let e_filteredData = data.filter((item: ApodModel) =>
           item.explanation.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.set(PAGE_KEYS.APOD, term, e_filteredData);
+        this.cacheService.setSearch(pageNumber, cacheKey, e_filteredData);
         return of(e_filteredData);
       // filter by copyright
       case 'c':
-        let c_filteredData = defaultCache.filter((item: ApodModel) =>
+        let c_filteredData = data.filter((item: ApodModel) =>
           item.copyright.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.set(PAGE_KEYS.APOD, term, c_filteredData);
+        this.cacheService.setSearch(pageNumber, cacheKey, c_filteredData);
         return of(c_filteredData);
       // filter by date
       case 'd':
-        let d_filteredData = defaultCache.filter((item: ApodModel) =>
+        // TODO add another case for `dd` which will filter by local data, and case `d` will call an API
+        let d_filteredData = data.filter((item: ApodModel) =>
           item.date.includes(value)
         );
-        this.cacheService.set(PAGE_KEYS.APOD, term, d_filteredData);
+        this.cacheService.setSearch(pageNumber, cacheKey, d_filteredData);
         return of(d_filteredData);
       default:
-        return of([]);
+        throw new SearchError(
+          `Invalid search prefix: '${property}'. Valid prefixes are \`t\` - title, \`e\` - explanation, \`c\` - copyright, \`d\` - date.`,
+          property
+        );
     }
   }
 
-  private apiCall(startDate: Date, endDate: Date): Observable<ApodModel[]> {
+  //TODO fix memory leak when returning empty array. Check via breakpoint.
+
+  private apiCall(
+    startDate: Date,
+    endDate: Date,
+    pageNumber: number
+  ): Observable<ApodModel[]> {
     let modifiedStartDate = subtractDayFromDate(startDate);
     let modifiedEndDate = subtractDayFromDate(endDate);
 
@@ -104,11 +141,7 @@ export class ApodSearchService {
           return [];
         }
 
-        this.cacheService.set(
-          PAGE_KEYS.APOD,
-          DEFAULT_CACHE_KEYS.APOD,
-          responseData
-        );
+        this.cacheService.setPagination(pageNumber, responseData);
 
         return responseData;
       }),
@@ -122,4 +155,6 @@ export class ApodSearchService {
       })
     );
   }
+
+  //TODO fix search service not handling the ordinary search term like `NASA`, without property
 }

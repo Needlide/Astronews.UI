@@ -40,7 +40,7 @@
 
     <app-pagination
       [displayItemsPerPage]="false"
-      [totalItems]="totalItems"
+      [totalItems]="(totalItems$ | async) ?? 0"
       (pageChanged)="pageChanged($event)"
     />
   </section>

@@ -38,7 +38,7 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
       this._searchCache.get(page) || new Map<string, ApodCache>();
     const expiry = Date.now() + ttl;
 
-    pageCache.set(key, { data: value, expiry });
+    pageCache.set(key.toLowerCase(), { data: value, expiry });
     this._searchCache.set(page, pageCache);
   }
 
@@ -64,14 +64,14 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
       return null;
     }
 
-    const cache = pageCache.get(key);
+    const cache = pageCache.get(key.toLowerCase());
 
     if (!cache) {
       return null;
     }
 
     if (Date.now() > cache.expiry) {
-      pageCache.delete(key);
+      pageCache.delete(key.toLowerCase());
 
       pageCache.size === 0
         ? this._searchCache.delete(page)
@@ -91,7 +91,7 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
     const pageCache = this._searchCache.get(page);
 
     if (pageCache) {
-      pageCache.delete(key);
+      pageCache.delete(key.toLowerCase());
 
       this._searchCache.set(page, pageCache);
     }

@@ -5,6 +5,7 @@ import { ApodActions } from './apod.actions';
 export interface ApodState {
   data: ApodModel[];
   isLoading: boolean;
+  paginationEnabled: boolean;
   error: string | null;
   page: number;
   totalItems: number;
@@ -13,6 +14,7 @@ export interface ApodState {
 export const initialState: ApodState = {
   data: [],
   isLoading: false,
+  paginationEnabled: true,
   error: null,
   page: 1,
   totalItems: 0,
@@ -30,16 +32,19 @@ export const apodReducer = createReducer(
     data: data,
     isLoading: false,
     error: null,
+    paginationEnabled: true,
   })),
   on(ApodActions.loadDataFailure, (state, { error }) => ({
     ...state,
     isLoading: false,
     error,
+    paginationEnabled: false,
   })),
   on(ApodActions.initiateSearch, (state) => ({
     ...state,
     isLoading: true,
     error: null,
+    paginationEnabled: false,
   })),
   on(ApodActions.initiateSearchSuccess, (state, { data }) => ({
     ...state,
@@ -57,6 +62,7 @@ export const apodReducer = createReducer(
     isLoading: true,
     error: null,
     page: pageNumber,
+    paginationEnabled: true,
   })),
   on(ApodActions.loadPageFromCacheSuccess, (state, { data }) => ({
     ...state,
@@ -68,6 +74,7 @@ export const apodReducer = createReducer(
     ...state,
     isLoading: false,
     error,
+    paginationEnabled: false,
   })),
   on(ApodActions.calculateTotalItemsSuccess, (state, { totalItems }) => ({
     ...state,
@@ -76,5 +83,10 @@ export const apodReducer = createReducer(
   on(ApodActions.changeCurrentPage, (state, { currentPage }) => ({
     ...state,
     page: currentPage,
+  })),
+  on(ApodActions.setError, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error,
   }))
 );

@@ -89,6 +89,17 @@ export class DataService {
       .pipe(catchError(this.handleError));
   }
 
+  // retrieve a single APOD image
+  getApod(date: Date): Observable<ApodModel> {
+    let apiKey = this.apiKeyService.getApiKey();
+    let requestUrl = this.apodEndpoint.concat(
+      `?date=${convertDateToString(date)}&api_key=${apiKey}`
+    );
+    return this.http
+      .get<ApodModel>(requestUrl)
+      .pipe(catchError(this.handleError));
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('An error occurred: ', error);
 

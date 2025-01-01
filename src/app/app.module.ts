@@ -36,6 +36,7 @@ import { NasaGalleryEffects } from './nasa-gallery/nasa-gallery.effects';
 import { ApodEffects } from './apod/apod.effects';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 import { PaginationComponent } from './pagination/pagination.component';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -91,6 +92,7 @@ import { PaginationComponent } from './pagination/pagination.component';
       useClass: AuthInterceptorService,
       multi: true,
     },
+    DatePipe,
   ],
   bootstrap: [AppComponent],
 })

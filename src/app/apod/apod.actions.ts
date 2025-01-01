@@ -26,5 +26,6 @@ export const ApodActions = createActionGroup({
     'Calculate Total Items': emptyProps(),
     'Calculate Total Items Success': props<{ totalItems: number }>(),
     'Change Current Page': props<{ currentPage: number }>(),
+    'Set Error': props<{ error: string }>(),
   },
 });

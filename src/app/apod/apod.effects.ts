@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ApodActions } from './apod.actions';
-import { catchError, map, mergeMap, of } from 'rxjs';
+import { catchError, map, mergeMap, of, switchMap } from 'rxjs';
 import { ApodSearchService } from '../search/apod-search.service';
 import { subtractDayFromDate } from '../shared/date-functions';
 
@@ -15,7 +15,7 @@ export class ApodEffects {
   loadData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ApodActions.loadData),
-      mergeMap((action) =>
+      switchMap((action) =>
         this.searchService
           .load(action.startDate, action.endDate, action.pageNumber)
           .pipe(
@@ -31,7 +31,7 @@ export class ApodEffects {
   initiateSearch$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ApodActions.initiateSearch),
-      mergeMap((action) =>
+      switchMap((action) =>
         this.searchService
           .search(action.searchTerm, action.cacheKey, action.pageNumber)
           .pipe(
@@ -49,7 +49,7 @@ export class ApodEffects {
   loadPageFromCache$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ApodActions.loadPageFromCache),
-      mergeMap((action) =>
+      switchMap((action) =>
         this.searchService.loadPageFromCache(action.pageNumber).pipe(
           map((data) => {
             return ApodActions.loadPageFromCacheSuccess({ data });

@@ -1,55 +1,66 @@
-@if (isLoading$ | async; as isLoading) {
-<app-loading-spinner></app-loading-spinner>
-} @if (data$ | async; as data) {
 <div>
-  @if (data.length > 0) {
-  <section class="container content">
-    @for (item of data | dataSort : 'date'; track $index) {
-    <article>
-      @if (item.url && item.title && item.explanation) {
-      <div class="apod-image-card">
-        <h2 class="image-title">{{ item.title }}</h2>
-        <p class="image-explanation">{{ item.explanation }}</p>
-
-        @if (isYouTubeLink(item.url)) {
-        <div class="video-container">
-          <iframe
-            [src]="getSafeUrl(item.url)"
-            allowfullscreen="true"
-            referrerpolicy="no-referrer"
-            frameborder="0"
-          ></iframe>
-        </div>
-        } @else {
-        <img class="image" [src]="item.url" />
-        }
-
-        <div>
-          @if (item.copyright) {
-          <p class="image-copyright">{{ item.copyright }}</p>
-          } @if (item.date) {
-          <p class="image-date">{{ item.date }}</p>
-          } @if (!isYouTubeLink(item.url) && item.hdurl) {
-          <a class="hd-link" [href]="item.hdurl" target="_blank"> HD image </a>
-          }
-        </div>
-      </div>
-      }
-    </article>
-    }
-
-    <app-pagination
-      [displayItemsPerPage]="false"
-      [totalItems]="(totalItems$ | async) ?? 0"
-      (pageChanged)="pageChanged($event)"
-    />
-  </section>
-  } @else { @if (error$ | async; as error) {
+  @if (error$ | async; as error) {
   <div class="error-message">
     <p>Error: {{ error }}</p>
   </div>
-  } @else { @if (!(isLoading$ | async)) {
-  <div class="error-message">No data available.</div>
-  } } }
+  } @if (!(error$ | async) && !(data$ | async)?.length && !(isLoading$ | async))
+  {
+  <div>
+    <p class="error-message">No data available.</p>
+  </div>
+  } @if ((isLoading$ | async) && !(error$ | async)) {
+  <app-loading-spinner />
+  } @if (!(error$ | async) && (data$ | async); as data) {
+  <div>
+    @if (data.length > 0) {
+    <section class="container content">
+      @for (item of data | dataSort : 'date'; track $index) {
+      <div>
+        @if (item.url && item.title && item.explanation) {
+        <article>
+          <div class="apod-image-card">
+            <h2 class="image-title">{{ item.title }}</h2>
+            <p class="image-explanation">{{ item.explanation }}</p>
+
+            @if (isYouTubeLink(item.url)) {
+            <div class="video-container">
+              <iframe
+                [src]="getSafeUrl(item.url)"
+                allowfullscreen="true"
+                referrerpolicy="no-referrer"
+                frameborder="0"
+              ></iframe>
+            </div>
+            } @else {
+            <img class="image" [src]="item.url" />
+            }
+
+            <div>
+              @if (item.copyright) {
+              <p class="image-copyright">
+                {{ item.copyright }}
+              </p>
+              } @if (item.date) {
+              <p class="image-date">{{ item.date }}</p>
+              } @if (!isYouTubeLink(item.url) && item.hdurl) {
+              <a class="hd-link" [href]="item.hdurl" target="_blank">
+                HD image
+              </a>
+              }
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+      } @if (paginationEnabled$ | async) {
+      <app-pagination
+        [displayItemsPerPage]="false"
+        [totalItems]="(totalItems$ | async) ?? 0"
+        (pageChanged)="pageChanged($event)"
+      />
+      }
+    </section>
+    }
+  </div>
+  }
 </div>
-}

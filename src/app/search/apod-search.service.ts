@@ -5,17 +5,19 @@ import { parseSearchTerm } from './search.util';
 import {
   errorMessageCacheRetrieve,
   errorMessageDataFetch,
+  firstDateForApod,
 } from '../shared/constants';
 import { catchError, map, Observable, of, switchMap, take } from 'rxjs';
 import { DataService } from '../data.service';
-import { subtractDayFromDate } from '../shared/date-functions';
+import { isISO8601Date, subtractDayFromDate } from '../shared/date-functions';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { ROUTES } from '../app.routes';
 import { Store } from '@ngrx/store';
 import { selectApodData } from '../apod/apod.selectors';
-import { SearchError } from '../error/apod/search.error';
-import { CacheError } from '../error/apod/cache.error';
+import { DatePipe } from '@angular/common';
+import { Either, left, right, isLeft } from 'fp-ts/lib/Either';
+import { ApodActions } from '../apod/apod.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +28,8 @@ export class ApodSearchService {
     private dataService: DataService,
     private errorService: ErrorService,
     private router: Router,
-    private store: Store
+    private store: Store,
+    private datePipe: DatePipe
   ) {}
 
   load(
@@ -49,6 +52,7 @@ export class ApodSearchService {
     pageNumber: number
   ): Observable<ApodModel[]> {
     let data$ = this.store.select(selectApodData);
+
     return data$.pipe(
       take(1),
       switchMap((data) => {
@@ -58,7 +62,21 @@ export class ApodSearchService {
           return of(cache);
         }
 
-        return this.searchLogic(searchTerm, data, cacheKey, pageNumber);
+        return this.searchLogic(searchTerm, data, cacheKey, pageNumber).pipe(
+          map((result) => {
+            if (isLeft(result)) {
+              const errorMessage = result.left;
+              this.store.dispatch(
+                ApodActions.setError({ error: errorMessage })
+              );
+              return [];
+            } else {
+              const apodModels = result.right;
+
+              return apodModels;
+            }
+          })
+        );
       })
     );
   }
@@ -67,7 +85,10 @@ export class ApodSearchService {
     let cache = this.cacheService.getPagination(pageNumber);
 
     if (!cache) {
-      throw new CacheError(errorMessageCacheRetrieve, pageNumber);
+      this.store.dispatch(
+        ApodActions.setError({ error: errorMessageCacheRetrieve })
+      );
+      return of([]);
     }
 
     return of(cache);
@@ -78,9 +99,8 @@ export class ApodSearchService {
     data: ApodModel[],
     cacheKey: string,
     pageNumber: number
-  ): Observable<ApodModel[]> {
+  ): Observable<Either<string, ApodModel[]>> {
     const { property, value } = parseSearchTerm(searchTerm);
-    // TODO t:Comet and t:comet result in two cache records, because cache treats them as two different keys
     switch (property?.toLowerCase()) {
       // filter by title
       case 't':
@@ -88,33 +108,60 @@ export class ApodSearchService {
           item.title.toLowerCase().includes(value.toLowerCase())
         );
         this.cacheService.setSearch(pageNumber, cacheKey, t_filteredData);
-        return of(t_filteredData);
+        return of(right(t_filteredData));
       // filter by explanation
       case 'e':
         let e_filteredData = data.filter((item: ApodModel) =>
           item.explanation.toLowerCase().includes(value.toLowerCase())
         );
         this.cacheService.setSearch(pageNumber, cacheKey, e_filteredData);
-        return of(e_filteredData);
+        return of(right(e_filteredData));
       // filter by copyright
       case 'c':
         let c_filteredData = data.filter((item: ApodModel) =>
           item.copyright.toLowerCase().includes(value.toLowerCase())
         );
         this.cacheService.setSearch(pageNumber, cacheKey, c_filteredData);
-        return of(c_filteredData);
-      // filter by date
+        return of(right(c_filteredData));
+      // request single image from API by date
       case 'd':
-        // TODO add another case for `dd` which will filter by local data, and case `d` will call an API
+        if (!isISO8601Date(value)) {
+          return of(
+            left(
+              'Invalid date format. Please use YYYY-MM-DD format (e.g. 2020-10-30).'
+            )
+          );
+        }
+
+        const date = new Date(value);
+        if (date < firstDateForApod || date > new Date()) {
+          return of(
+            left(
+              `Date must be between June 16, 1995, and ${this.datePipe.transform(
+                new Date(),
+                'MMMM d, y'
+              )}.`
+            )
+          );
+        }
+
+        return this.dataService.getApod(date).pipe(
+          map((apod) => right([apod])),
+          catchError(() => of(left('Failed to fetch APOD data.')))
+        );
+
+      // filter by date
+      case 'dd':
         let d_filteredData = data.filter((item: ApodModel) =>
           item.date.includes(value)
         );
         this.cacheService.setSearch(pageNumber, cacheKey, d_filteredData);
-        return of(d_filteredData);
+        return of(right(d_filteredData));
       default:
-        throw new SearchError(
-          `Invalid search prefix: '${property}'. Valid prefixes are \`t\` - title, \`e\` - explanation, \`c\` - copyright, \`d\` - date.`,
-          property
+        return of(
+          left(
+            `Invalid search prefix: '${property}'. Valid prefixes are \`t\` - title, \`e\` - explanation, \`c\` - copyright, \`d\` - date.`
+          )
         );
     }
   }

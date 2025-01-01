@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApodModel } from '../models/apod/apod.model';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { map, Observable, switchMap, take } from 'rxjs';
+import { map, Observable, skip, switchMap, take } from 'rxjs';
 import {
   addDayToDate,
   addMonthToDate,
@@ -14,11 +14,15 @@ import {
   selectApodError,
   selectApodLoading,
   selectApodPage,
+  selectApodPaginationEnabled,
   selectApodTotalItems,
 } from './apod.selectors';
 import { ApodActions } from './apod.actions';
 import { SearchService } from '../search/search.service';
-import { minSymbolsToTriggerSearch } from '../shared/constants';
+import {
+  minSymbolsToTriggerSearch,
+  firstDateForApod,
+} from '../shared/constants';
 
 @Component({
   selector: 'app-apod',
@@ -31,8 +35,11 @@ export class APODComponent implements OnInit {
   error$: Observable<string | null> = this.store.select(selectApodError);
   currentPage$: Observable<number> = this.store.select(selectApodPage);
   totalItems$: Observable<number> = this.store.select(selectApodTotalItems);
+  paginationEnabled$: Observable<boolean> = this.store.select(
+    selectApodPaginationEnabled
+  );
 
-  private readonly firstDateForApod = new Date('Jun 16, 1995');
+  // TODO (switch to second page, search for something successfully, clear search bar) => pagination thinks first page, when actually second
 
   constructor(
     private store: Store<ApodState>,
@@ -47,6 +54,7 @@ export class APODComponent implements OnInit {
 
     this.searchService.searchTerm$
       .pipe(
+        skip(1),
         switchMap((searchText) =>
           this.currentPage$.pipe(
             take(1),
@@ -95,9 +103,9 @@ export class APODComponent implements OnInit {
       startDate = subtractMonthFromDate(startDate);
     }
 
-    if (startDate < this.firstDateForApod) {
-      startDate = new Date(this.firstDateForApod);
-      endDate = addMonthToDate(this.firstDateForApod);
+    if (startDate < firstDateForApod) {
+      startDate = new Date(firstDateForApod);
+      endDate = addMonthToDate(firstDateForApod);
     }
 
     this.store.dispatch(ApodActions.changeCurrentPage({ currentPage: page }));

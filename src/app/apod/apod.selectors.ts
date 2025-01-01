@@ -27,3 +27,8 @@ export const selectApodTotalItems = createSelector(
   selectApodState,
   (state) => state.totalItems
 );
+
+export const selectApodPaginationEnabled = createSelector(
+  selectApodState,
+  (state) => state.paginationEnabled
+);

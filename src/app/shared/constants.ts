@@ -4,3 +4,4 @@ export const errorMessageDataFetch =
 export const errorMessageCacheRetrieve =
   'Error occured during cache retrieval. Try to refresh the page.';
 export const searchPause = 730;
+export const firstDateForApod = new Date('Jun 16, 1995');

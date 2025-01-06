@@ -39,14 +39,12 @@ export class APODComponent implements OnInit {
     selectApodPaginationEnabled
   );
 
-  // TODO (switch to second page, search for something successfully, clear search bar) => pagination thinks first page, when actually second
-
   constructor(
     private store: Store<ApodState>,
     private sanitizer: DomSanitizer,
     private searchService: SearchService
   ) {}
-
+  // TODO rewrite the logic of fetching data from apod to fetch data from the end of the month to the start of it, not just by 30 days (e.g. 05.01.2025 - 05.12.2024 when must be 05.01.2025 - 01.01.2025 and 31.12.2024 - 01.12.2024)
   ngOnInit(): void {
     this.store.dispatch(ApodActions.calculateTotalItems());
 

@@ -54,6 +54,7 @@
       </div>
       } @if (paginationEnabled$ | async) {
       <app-pagination
+        [currentPage]="(currentPage$ | async) ?? 1"
         [displayItemsPerPage]="false"
         [totalItems]="(totalItems$ | async) ?? 0"
         (pageChanged)="pageChanged($event)"

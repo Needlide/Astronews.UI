@@ -57,11 +57,10 @@ export const apodReducer = createReducer(
     isLoading: false,
     error,
   })),
-  on(ApodActions.loadPageFromCache, (state, { pageNumber }) => ({
+  on(ApodActions.loadPageFromCache, (state) => ({
     ...state,
     isLoading: true,
     error: null,
-    page: pageNumber,
     paginationEnabled: true,
   })),
   on(ApodActions.loadPageFromCacheSuccess, (state, { data }) => ({

@@ -100,7 +100,24 @@ export class ApodSearchService {
     cacheKey: string,
     pageNumber: number
   ): Observable<Either<string, ApodModel[]>> {
+    // property - prefix    value - search value
+    // if search term doesn't contain the prefix - the property is undefined
     const { property, value } = parseSearchTerm(searchTerm);
+
+    if (!property) {
+      let filteredData = data.filter(
+        (item: ApodModel) =>
+          item.title.toLowerCase().includes(value.toLowerCase()) ||
+          item.explanation.toLowerCase().includes(value.toLowerCase()) ||
+          item.copyright?.toLowerCase().includes(value.toLowerCase()) ||
+          item.date.includes(value)
+      );
+
+      this.cacheService.setSearch(pageNumber, cacheKey, filteredData);
+
+      return of(right(filteredData));
+    }
+
     switch (property?.toLowerCase()) {
       // filter by title
       case 't':
@@ -166,8 +183,6 @@ export class ApodSearchService {
     }
   }
 
-  //TODO fix memory leak when returning empty array. Check via breakpoint.
-
   private apiCall(
     startDate: Date,
     endDate: Date,
@@ -196,6 +211,4 @@ export class ApodSearchService {
       })
     );
   }
-
-  //TODO fix search service not handling the ordinary search term like `NASA`, without property
 }

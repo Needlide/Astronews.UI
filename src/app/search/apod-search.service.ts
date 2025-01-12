@@ -9,7 +9,7 @@ import {
 } from '../shared/constants';
 import { catchError, map, Observable, of, switchMap, take } from 'rxjs';
 import { DataService } from '../data.service';
-import { isISO8601Date, subtractDayFromDate } from '../shared/date-functions';
+import { isISO8601Date } from '../shared/date-functions';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 import { ROUTES } from '../app.routes';
@@ -188,10 +188,7 @@ export class ApodSearchService {
     endDate: Date,
     pageNumber: number
   ): Observable<ApodModel[]> {
-    let modifiedStartDate = subtractDayFromDate(startDate);
-    let modifiedEndDate = subtractDayFromDate(endDate);
-
-    return this.dataService.getApods(modifiedStartDate, modifiedEndDate).pipe(
+    return this.dataService.getApods(startDate, endDate).pipe(
       map((responseData) => {
         if (responseData.length == 0) {
           return [];

@@ -5,6 +5,7 @@ import { map, Observable, skip, switchMap, take } from 'rxjs';
 import {
   addDayToDate,
   addMonthToDate,
+  subtractDayFromDate,
   subtractMonthFromDate,
 } from '../shared/date-functions';
 import { Store } from '@ngrx/store';
@@ -44,7 +45,6 @@ export class APODComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private searchService: SearchService
   ) {}
-  // TODO rewrite the logic of fetching data from apod to fetch data from the end of the month to the start of it, not just by 30 days (e.g. 05.01.2025 - 05.12.2024 when must be 05.01.2025 - 01.01.2025 and 31.12.2024 - 01.12.2024)
   ngOnInit(): void {
     this.store.dispatch(ApodActions.calculateTotalItems());
 
@@ -79,13 +79,16 @@ export class APODComponent implements OnInit {
 
   private loadData(): void {
     this.currentPage$.pipe(take(1)).subscribe((currentPage) => {
-      let endDate = new Date();
-      let startDate = subtractMonthFromDate(endDate);
+      const today = new Date();
+      const { startDate, adjustedEndDate } = this.calculateDateRange(
+        today,
+        currentPage
+      );
 
       this.store.dispatch(
         ApodActions.loadData({
-          startDate: startDate,
-          endDate: endDate,
+          startDate,
+          endDate: adjustedEndDate,
           pageNumber: currentPage,
         })
       );
@@ -93,27 +96,21 @@ export class APODComponent implements OnInit {
   }
 
   pageChanged(page: number): void {
-    let endDate = new Date();
-    let startDate = subtractMonthFromDate(endDate);
-
-    for (let i = 0; i < page; i++) {
-      endDate = subtractMonthFromDate(endDate);
-      startDate = subtractMonthFromDate(startDate);
-    }
-
-    if (startDate < firstDateForApod) {
-      startDate = new Date(firstDateForApod);
-      endDate = addMonthToDate(firstDateForApod);
-    }
+    const today = new Date();
+    const endDate = subtractDayFromDate(today); // Exclude the current day
+    const { startDate, adjustedEndDate } = this.calculateDateRange(
+      endDate,
+      page
+    );
 
     this.store.dispatch(ApodActions.changeCurrentPage({ currentPage: page }));
 
-    this.currentPage$.pipe(take(1)).subscribe((currentPage) => {
+    this.currentPage$.pipe(take(1)).subscribe(() => {
       this.store.dispatch(
         ApodActions.loadData({
-          startDate: addDayToDate(startDate),
-          endDate: addDayToDate(endDate),
-          pageNumber: currentPage,
+          startDate,
+          endDate: adjustedEndDate,
+          pageNumber: page,
         })
       );
     });
@@ -125,5 +122,47 @@ export class APODComponent implements OnInit {
 
   getSafeUrl(url: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  private calculateDateRange(
+    endDate: Date,
+    page: number
+  ): { startDate: Date; adjustedEndDate: Date } {
+    let adjustedEndDate = new Date(endDate);
+
+    for (let i = 1; i < page; i++) {
+      adjustedEndDate = subtractMonthFromDate(adjustedEndDate);
+    }
+
+    // First day of the month
+    const startDate = new Date(
+      adjustedEndDate.getFullYear(),
+      adjustedEndDate.getMonth(),
+      1
+    );
+
+    // Check to not add the month to the current date
+    if (page !== 1) {
+      // Last day of the month
+      adjustedEndDate = new Date(
+        adjustedEndDate.getFullYear(),
+        adjustedEndDate.getMonth() + 1,
+        0
+      );
+    }
+
+    // Check so dates don't exceed the start date of APOD
+    if (startDate < firstDateForApod) {
+      return {
+        startDate: new Date(firstDateForApod),
+        adjustedEndDate: new Date(
+          firstDateForApod.getFullYear(),
+          firstDateForApod.getMonth() + 1,
+          0
+        ),
+      };
+    }
+
+    return { startDate, adjustedEndDate };
   }
 }

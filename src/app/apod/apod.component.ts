@@ -3,8 +3,6 @@ import { ApodModel } from '../models/apod/apod.model';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { map, Observable, skip, switchMap, take } from 'rxjs';
 import {
-  addDayToDate,
-  addMonthToDate,
   subtractDayFromDate,
   subtractMonthFromDate,
 } from '../shared/date-functions';

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApodModel } from '../models/apod/apod.model';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { map, Observable, skip, switchMap, take } from 'rxjs';
+import { map, Observable, skip, switchMap, take, tap } from 'rxjs';
 import {
   subtractDayFromDate,
   subtractMonthFromDate,
@@ -43,6 +43,7 @@ export class APODComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private searchService: SearchService
   ) {}
+
   ngOnInit(): void {
     this.store.dispatch(ApodActions.calculateTotalItems());
 
@@ -103,15 +104,20 @@ export class APODComponent implements OnInit {
 
     this.store.dispatch(ApodActions.changeCurrentPage({ currentPage: page }));
 
-    this.currentPage$.pipe(take(1)).subscribe(() => {
-      this.store.dispatch(
-        ApodActions.loadData({
-          startDate,
-          endDate: adjustedEndDate,
-          pageNumber: page,
+    this.currentPage$
+      .pipe(
+        take(1),
+        tap(() => {
+          this.store.dispatch(
+            ApodActions.loadData({
+              startDate,
+              endDate: adjustedEndDate,
+              pageNumber: page,
+            })
+          );
         })
-      );
-    });
+      )
+      .subscribe();
   }
 
   isYouTubeLink(url: string): boolean {

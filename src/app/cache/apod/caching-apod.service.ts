@@ -15,8 +15,8 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
   // key - page number, value - (key - search term, value - search data)
   private _searchCache: Map<number, Map<string, ApodCache>> = new Map();
 
-  // 1_800_000 = 30 minutes
-  private readonly _ttl = 1_800_000;
+  // 3_600_000 = 1 hour
+  private readonly _ttl = 3_600_000;
 
   setPagination(
     page: number,

@@ -15,7 +15,9 @@ export class PaginationComponent {
   @Input() currentPage: number = 1;
   @Output() pageChanged: EventEmitter<number> = new EventEmitter();
 
-  public itemsPerPage: number[] = [15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+  public itemsPerPage: number[] = [
+    20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200,
+  ];
   public selectedItemsPerPage: number = 30;
 
   get totalPages(): number {

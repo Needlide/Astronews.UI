@@ -1,4 +1,4 @@
-export const minSymbolsToTriggerSearch = 4;
+export const minSymbolsToTriggerSearch = 3;
 export const errorMessageDataFetch =
   'Error occured during data fetch. Please, try again shortly.';
 export const errorMessageCacheRetrieve =

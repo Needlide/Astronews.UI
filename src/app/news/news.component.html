@@ -1,30 +1,63 @@
-<app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
-<div *ngIf="data$ | async as data">
-  <section class="container content" *ngIf="data.length > 0">
-    <article class="tile" *ngFor="let item of data; let i = index">
-      <h2 *ngIf="item.image_url && item.title" style="text-align: center">
-        {{ item.title }}
-      </h2>
-
-      <a [href]="item.url" target="_blank">
-        <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
-      </a>
-
-      <p class="tile-summary" *ngIf="item.summary">{{ item.summary }}</p>
-
+<div>
+  @if (error) {
+  <div class="error-message">
+    <p>Error: {{ error }}</p>
+  </div>
+  } @if (!(error) && !(data$ | async)?.length && !(isLoading)) {
+  <div>
+    <p class="error-message">No data available.</p>
+  </div>
+  } @if ((isLoading) && !(error)) {
+  <app-loading-spinner />
+  } @if (!(error) && (data$ | async); as data) {
+  <div>
+    @if (data.length > 0) {
+    <section class="container content">
+      @for (item of data; track $index) {
       <div>
-        <div class="link-wrapper">
-          <a
-            class="tile-link"
-            *ngIf="item.news_site"
-            [href]="item.url"
-            target="_blank"
-            >{{ item.news_site }}</a
-          >
-        </div>
+        @if (item.url && item.title && item.image_url && item.news_site) {
+        <article class="tile">
+          <h2 style="text-align: center">
+            {{ item.title }}
+          </h2>
 
-        <p *ngIf="item.published_at">{{ item.published_at | dateFormat }}</p>
+          <a [href]="item.url" target="_blank">
+            <img [src]="item.image_url" alt="Article Image" />
+          </a>
+
+          @if (item.summary) {
+          <p class="tile-summary">{{ item.summary }}</p>
+          }
+
+          <div>
+            <div class="link-wrapper">
+              <a class="tile-link" [href]="item.url" target="_blank">{{
+                item.news_site
+              }}</a>
+            </div>
+
+            @if (item.published_at) {
+            <p>
+              {{ item.published_at | dateFormat }}
+            </p>
+            }
+          </div>
+        </article>
+        }
       </div>
-    </article>
-  </section>
+      }
+      <app-pagination
+        [currentPage]="isSearchState ? currentSearchPage : currentPage"
+        [displayItemsPerPage]="true"
+        [totalItems]="isSearchState ? totalSearchItems : totalItems"
+        [selectedItemsPerPage]="
+          isSearchState ? searchItemsPerPage : itemsPerPage
+        "
+        (pageChanged)="onPageChanged($event)"
+        (itemsPerPageChanged)="onItemsPerPageChanged($event)"
+      />
+    </section>
+    }
+  </div>
+  }
 </div>

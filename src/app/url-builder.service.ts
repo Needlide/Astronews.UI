@@ -9,12 +9,20 @@ import {
   PerseveranceCameras,
   SpiritCameras,
 } from './models/mars/rover.cameras';
+import { isISO8601Date, isYYYYFormat } from './shared/date-functions';
 
 enum MediaType {
   Image,
   Video,
   Audio,
 }
+
+const roverEndpoints = {
+  [Rovers.Opportunity]: environment.api.marsOpportunityEndpoint,
+  [Rovers.Spirit]: environment.api.marsSpiritEndpoint,
+  [Rovers.Perseverance]: environment.api.marsPerseveranceEndpoint,
+  [Rovers.Curiosity]: environment.api.marsCuriosityEndpoint,
+};
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +32,7 @@ export class UrlBuilderService {
 
   getNewsUrl(
     limit: number = 200,
+    offset: number = 0,
     source: string[] = [],
     published_after: string = '',
     published_before: string = '',
@@ -35,6 +44,8 @@ export class UrlBuilderService {
 
     newsUrlBase += `?limit=${limit}`;
 
+    newsUrlBase += `&offset=${offset}`;
+
     if (source.length > 0) {
       newsUrlBase += `&news_site=${source[0]}`;
 
@@ -43,6 +54,7 @@ export class UrlBuilderService {
       }
     }
 
+    // TODO implement adding banned sources by user
     let bannedSources = this.sourceManager.getBannedSources();
 
     if (bannedSources.length > 0) {
@@ -53,11 +65,11 @@ export class UrlBuilderService {
       }
     }
 
-    if (this.isISO8601Date(published_after)) {
+    if (isISO8601Date(published_after)) {
       newsUrlBase += `&published_at_gte=${published_after}`;
     }
 
-    if (this.isISO8601Date(published_before)) {
+    if (isISO8601Date(published_before)) {
       newsUrlBase += `&published_at_lte=${published_before}`;
     }
 
@@ -137,14 +149,14 @@ export class UrlBuilderService {
       galleryUrlBase += `&title=${title}`;
     }
 
-    if (this.isYYYYFormat(start_year)) {
+    if (isYYYYFormat(start_year)) {
       galleryUrlBase += `&year_start=${start_year}`;
     } else {
       let date = new Date();
       galleryUrlBase += `&year_start=${date.getUTCFullYear()}`;
     }
 
-    if (this.isYYYYFormat(end_year)) {
+    if (isYYYYFormat(end_year)) {
       galleryUrlBase += `&year_end=${end_year}`;
     }
 
@@ -157,72 +169,39 @@ export class UrlBuilderService {
     rover: Rovers,
     camera?: MarsRoverCameras
   ): string {
-    let marsUrl = '';
+    let marsUrl = roverEndpoints[rover] || '';
 
-    switch (rover) {
-      case Rovers.Opportunity:
-        marsUrl = environment.api.marsOpportunityEndpoint;
-
-        if (camera !== undefined) {
-          marsUrl += `&camera=${OpportunityCameras[camera]}`;
-        }
-        break;
-      case Rovers.Spirit:
-        marsUrl = environment.api.marsSpiritEndpoint;
-
-        if (camera !== undefined) {
-          marsUrl += `&camera=${SpiritCameras[camera]}`;
-        }
-        break;
-      case Rovers.Perseverance:
-        marsUrl = environment.api.marsPerseveranceEndpoint;
-
-        if (camera !== undefined) {
-          marsUrl += `&camera=${PerseveranceCameras[camera]}`;
-        }
-        break;
-      case Rovers.Curiosity:
-        marsUrl = environment.api.marsCuriosityEndpoint;
-
-        if (camera !== undefined) {
-          marsUrl += `&camera=${CuriosityCameras[camera]}`;
-        }
-        break;
+    if (camera !== undefined) {
+      const cameraKey = this.getCameraKey(rover, camera);
+      if (cameraKey) marsUrl += `&camera=${cameraKey}`;
     }
 
-    if (sol !== '') {
-      marsUrl += `?sol=${sol}`;
-    }
-
-    if (this.isISO8601Date(earth_date) && sol !== '') {
-      marsUrl += `&earth_date=${earth_date}`;
-    } else if (this.isISO8601Date(earth_date)) {
-      marsUrl += `?earth_date=${earth_date}`;
-    }
+    if (sol !== '') marsUrl += `?sol=${sol}`;
+    if (isISO8601Date(earth_date)) marsUrl += `&earth_date=${earth_date}`;
 
     return marsUrl;
   }
 
   getMarsLatestUrl(rover: Rovers): string {
-    switch (rover) {
-      case Rovers.Opportunity:
-        return environment.api.marsOpportunityLatestEndpoint;
-      case Rovers.Spirit:
-        return environment.api.marsSpiritLatestEndpoint;
-      case Rovers.Perseverance:
-        return environment.api.marsPerseveranceLatestEndpoint;
-      case Rovers.Curiosity:
-        return environment.api.marsCuriosityLatestEndpoint;
-    }
+    const roverLatestUrls = {
+      [Rovers.Opportunity]: environment.api.marsOpportunityLatestEndpoint,
+      [Rovers.Spirit]: environment.api.marsSpiritLatestEndpoint,
+      [Rovers.Perseverance]: environment.api.marsPerseveranceLatestEndpoint,
+      [Rovers.Curiosity]: environment.api.marsCuriosityLatestEndpoint,
+    };
+    return roverLatestUrls[rover];
   }
 
-  private isISO8601Date(dateString: string): boolean {
-    const iso8601Pattern = /^\d{4}-\d{2}-\d{2}$/;
-
-    return iso8601Pattern.test(dateString);
-  }
-
-  private isYYYYFormat(year: string): boolean {
-    return /^\d{4}$/.test(year);
+  private getCameraKey(
+    rover: Rovers,
+    camera: MarsRoverCameras
+  ): string | undefined {
+    const cameraMapping = {
+      [Rovers.Opportunity]: OpportunityCameras,
+      [Rovers.Spirit]: SpiritCameras,
+      [Rovers.Perseverance]: PerseveranceCameras,
+      [Rovers.Curiosity]: CuriosityCameras,
+    };
+    return cameraMapping[rover]?.[camera];
   }
 }

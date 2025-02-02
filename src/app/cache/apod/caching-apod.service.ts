@@ -97,8 +97,11 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
     }
   }
 
-  clear(): void {
+  clearPagination(): void {
     this._paginationCache.clear();
+  }
+
+  clearSearch(): void {
     this._searchCache.clear();
   }
 }

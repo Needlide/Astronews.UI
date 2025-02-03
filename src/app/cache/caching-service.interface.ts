@@ -5,12 +5,7 @@ export interface ICachingService<T> {
 
   getPagination(page: number): T | null;
 
-  getSearch(
-    page: number,
-    key: string,
-    offset: number,
-    itemsPerPage: number
-  ): T | null;
+  getSearch(page: number, key: string): T | null;
 
   // Delete the cached pagination and related search data
   deletePagination(page: number): void;

@@ -20,6 +20,8 @@ export const environment = {
       'https://api.nasa.gov/mars-photos/api/v1/rovers/spirit/latest_photos',
     marsPerseveranceLatestEndpoint:
       'https://api.nasa.gov/mars-photos/api/v1/rovers/perseverance/latest_photos',
+    marsCuriosityManifestEndpoint:
+      'https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity',
   },
   secrets: {
     api_key: import.meta.env.NG_APP_NASA_API_KEY || '',

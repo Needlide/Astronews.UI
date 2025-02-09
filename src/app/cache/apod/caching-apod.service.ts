@@ -29,9 +29,9 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
   }
 
   setSearch(
-    page: number,
     key: string,
     value: ApodModel[],
+    page: number,
     ttl: number = this._ttl
   ): void {
     const pageCache =
@@ -57,7 +57,7 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
     return cache.data;
   }
 
-  getSearch(page: number, key: string): ApodModel[] | null {
+  getSearch(key: string, page: number): ApodModel[] | null {
     const pageCache = this._searchCache.get(page);
 
     if (!pageCache) {
@@ -87,7 +87,7 @@ export class CachingApodService implements ICachingService<ApodModel[]> {
     this._paginationCache.delete(page);
   }
 
-  deleteSearch(page: number, key: string): void {
+  deleteSearch(key: string, page: number): void {
     const pageCache = this._searchCache.get(page);
 
     if (pageCache) {

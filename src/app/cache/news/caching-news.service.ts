@@ -26,9 +26,9 @@ export class CachingNewsService implements ICachingService<NewsModel[]> {
   }
 
   setSearch(
-    page: number,
     key: string,
     value: NewsModel[],
+    page: number,
     ttl: number = this._ttl
   ): void {
     const pageCache =
@@ -43,7 +43,7 @@ export class CachingNewsService implements ICachingService<NewsModel[]> {
     return this.getValidCache(this._paginationCache.get(page));
   }
 
-  getSearch(page: number, key: string): NewsModel[] | null {
+  getSearch(key: string, page: number): NewsModel[] | null {
     const pageCache = this._searchCache.get(page);
 
     const cache = pageCache ? pageCache.get(key.toLowerCase()) : undefined;
@@ -54,7 +54,7 @@ export class CachingNewsService implements ICachingService<NewsModel[]> {
     this._paginationCache.delete(page);
   }
 
-  deleteSearch(page: number, key: string): void {
+  deleteSearch(key: string, page: number): void {
     const pageCache = this._searchCache.get(page);
 
     if (pageCache) {

@@ -56,7 +56,7 @@ export class ApodSearchService {
     return data$.pipe(
       take(1),
       switchMap((data) => {
-        let cache = this.cacheService.getSearch(pageNumber, cacheKey);
+        let cache = this.cacheService.getSearch(cacheKey, pageNumber);
 
         if (cache) {
           return of(cache);
@@ -113,7 +113,7 @@ export class ApodSearchService {
           item.date.includes(value)
       );
 
-      this.cacheService.setSearch(pageNumber, cacheKey, filteredData);
+      this.cacheService.setSearch(cacheKey, filteredData, pageNumber);
 
       return of(right(filteredData));
     }
@@ -124,21 +124,21 @@ export class ApodSearchService {
         let t_filteredData = data.filter((item: ApodModel) =>
           item.title.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.setSearch(pageNumber, cacheKey, t_filteredData);
+        this.cacheService.setSearch(cacheKey, t_filteredData, pageNumber);
         return of(right(t_filteredData));
       // filter by explanation
       case 'e':
         let e_filteredData = data.filter((item: ApodModel) =>
           item.explanation.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.setSearch(pageNumber, cacheKey, e_filteredData);
+        this.cacheService.setSearch(cacheKey, e_filteredData, pageNumber);
         return of(right(e_filteredData));
       // filter by copyright
       case 'c':
         let c_filteredData = data.filter((item: ApodModel) =>
           item.copyright.toLowerCase().includes(value.toLowerCase())
         );
-        this.cacheService.setSearch(pageNumber, cacheKey, c_filteredData);
+        this.cacheService.setSearch(cacheKey, c_filteredData, pageNumber);
         return of(right(c_filteredData));
       // request single image from API by date
       case 'd':
@@ -172,7 +172,7 @@ export class ApodSearchService {
         let d_filteredData = data.filter((item: ApodModel) =>
           item.date.includes(value)
         );
-        this.cacheService.setSearch(pageNumber, cacheKey, d_filteredData);
+        this.cacheService.setSearch(cacheKey, d_filteredData, pageNumber);
         return of(right(d_filteredData));
       default:
         return of(

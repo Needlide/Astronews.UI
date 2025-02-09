@@ -57,7 +57,7 @@ export class NewsSearchService {
     return this.searchLogic(searchTerm, itemsPerPage, offset).pipe(
       take(1),
       tap((searchedNews) =>
-        this.cacheService.setSearch(pageNumber, cacheKey, searchedNews)
+        this.cacheService.setSearch(cacheKey, searchedNews, pageNumber)
       )
     );
   }
@@ -72,7 +72,7 @@ export class NewsSearchService {
     pageNumber: number,
     searchQuery: string
   ): NewsModel[] | null {
-    let cache = this.cacheService.getSearch(pageNumber, searchQuery);
+    let cache = this.cacheService.getSearch(searchQuery, pageNumber);
 
     return cache;
   }

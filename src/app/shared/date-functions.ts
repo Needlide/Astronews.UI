@@ -4,7 +4,28 @@ export function isYYYYFormat(year: string): boolean {
 
 // check if the input is an ISO8601 date format (yyyy-MM-dd)
 export function isISO8601Date(dateString: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateString)) {
+    return false;
+  }
+
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+
+  const inputDate = new Date(year, month, day);
+
+  return (
+    inputDate.getUTCFullYear() === year &&
+    inputDate.getUTCMonth() === month &&
+    inputDate.getUTCDate() === day
+  );
 }
 
 // transform Date object to an ISO8601 format (yyyy-MM-dd)

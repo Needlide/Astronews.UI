@@ -8,12 +8,19 @@ export enum OpportunityCameras {
 
 export enum CuriosityCameras {
   FHAZ,
+  FHAZ_LEFT_B,
+  FHAZ_RIGHT_B,
   RHAZ,
+  RHAZ_RIGHT_B,
+  RHAZ_LEFT_B,
   MAST,
   CHEMCAM,
+  CHEMCAM_RMI,
   MAHLI,
   MARDI,
   NAVCAM,
+  NAV_RIGHT_B,
+  NAV_LEFT_B,
 }
 
 export enum SpiritCameras {

@@ -31,9 +31,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   onSearchTermChange(): void {
-    if (this.searchTerm.length >= minSymbolsToTriggerSearch) {
-      this.searchService.setSearchTerm(this.searchTerm);
-    }
+    this.searchService.setSearchTerm(this.searchTerm);
   }
 
   ngOnDestroy(): void {

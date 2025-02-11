@@ -9,7 +9,12 @@ import {
   PerseveranceCameras,
   SpiritCameras,
 } from './models/mars/rover.cameras';
-import { isISO8601Date, isYYYYFormat } from './shared/date-functions';
+import {
+  convertDateToString,
+  isISO8601Date,
+  isYYYYFormat,
+} from './shared/date-functions';
+import { ApiKeyService } from './api-key/api-key.service';
 
 enum MediaType {
   Image,
@@ -17,21 +22,17 @@ enum MediaType {
   Audio,
 }
 
-const roverEndpoints = {
-  [Rovers.Opportunity]: environment.api.marsOpportunityEndpoint,
-  [Rovers.Spirit]: environment.api.marsSpiritEndpoint,
-  [Rovers.Perseverance]: environment.api.marsPerseveranceEndpoint,
-  [Rovers.Curiosity]: environment.api.marsCuriosityEndpoint,
-};
-
 @Injectable({
   providedIn: 'root',
 })
 export class UrlBuilderService {
-  constructor(private sourceManager: SourceManagerService) {}
+  constructor(
+    private sourceManager: SourceManagerService,
+    private apiKeyService: ApiKeyService
+  ) {}
 
   getNewsUrl(
-    limit: number = 200,
+    limit: number = 40,
     offset: number = 0,
     source: string[] = [],
     published_after: string = '',
@@ -42,15 +43,15 @@ export class UrlBuilderService {
   ): string {
     let newsUrlBase = environment.api.newsEndpoint;
 
-    newsUrlBase += `?limit=${limit}`;
+    newsUrlBase = newsUrlBase.concat(`?limit=${limit}`);
 
-    newsUrlBase += `&offset=${offset}`;
+    newsUrlBase = newsUrlBase.concat(`&offset=${offset}`);
 
     if (source.length > 0) {
-      newsUrlBase += `&news_site=${source[0]}`;
+      newsUrlBase = newsUrlBase.concat(`&news_site=${source[0]}`);
 
       for (let index = 1; index < source.length; index++) {
-        newsUrlBase += `%2C${source[index]}`;
+        newsUrlBase = newsUrlBase.concat(`%2C${source[index]}`);
       }
     }
 
@@ -58,38 +59,40 @@ export class UrlBuilderService {
     let bannedSources = this.sourceManager.getBannedSources();
 
     if (bannedSources.length > 0) {
-      newsUrlBase += `&news_site_exclude=${bannedSources[0]}`;
+      newsUrlBase = newsUrlBase.concat(
+        `&news_site_exclude=${bannedSources[0]}`
+      );
 
       for (let index = 1; index < bannedSources.length; index++) {
-        newsUrlBase += `%2C${bannedSources[index]}`;
+        newsUrlBase = newsUrlBase.concat(`%2C${bannedSources[index]}`);
       }
     }
 
     if (isISO8601Date(published_after)) {
-      newsUrlBase += `&published_at_gte=${published_after}`;
+      newsUrlBase = newsUrlBase.concat(`&published_at_gte=${published_after}`);
     }
 
     if (isISO8601Date(published_before)) {
-      newsUrlBase += `&published_at_lte=${published_before}`;
+      newsUrlBase = newsUrlBase.concat(`&published_at_lte=${published_before}`);
     }
 
     if (title_summary !== '') {
-      newsUrlBase += `&search=${title_summary}`;
+      newsUrlBase = newsUrlBase.concat(`&search=${title_summary}`);
     }
 
     if (summary.length > 0) {
-      newsUrlBase += `&summary_contains_one=${summary[0]}`;
+      newsUrlBase = newsUrlBase.concat(`&summary_contains_one=${summary[0]}`);
 
       for (let index = 1; index < summary.length; index++) {
-        newsUrlBase += `%2C${summary[index]}`;
+        newsUrlBase = newsUrlBase.concat(`%2C${summary[index]}`);
       }
     }
 
     if (title.length > 0) {
-      newsUrlBase += `&title_contains_one=${title[0]}`;
+      newsUrlBase = newsUrlBase.concat(`&title_contains_one=${title[0]}`);
 
       for (let index = 1; index < title.length; index++) {
-        newsUrlBase += `%2C${title[index]}`;
+        newsUrlBase = newsUrlBase.concat(`%2C${title[index]}`);
       }
     }
 
@@ -97,7 +100,7 @@ export class UrlBuilderService {
   }
 
   getGalleryUrl(
-    limit: number = 80,
+    limit: number = 60,
     free_search: string = '',
     center: string = '',
     description: string = '',
@@ -111,85 +114,156 @@ export class UrlBuilderService {
   ): string {
     let galleryUrlBase = environment.api.nasaEndpoint;
 
-    galleryUrlBase += `?page_size=${limit}`;
+    galleryUrlBase = galleryUrlBase.concat(`?page_size=${limit}`);
 
     if (free_search !== '') {
-      galleryUrlBase += `&q=${free_search}`;
+      galleryUrlBase = galleryUrlBase.concat(`&q=${free_search}`);
     }
 
     if (center !== '') {
-      galleryUrlBase += `&center=${center}`;
+      galleryUrlBase = galleryUrlBase.concat(`&center=${center}`);
     }
 
     if (description !== '') {
-      galleryUrlBase += `&description=${description}`;
+      galleryUrlBase = galleryUrlBase.concat(`&description=${description}`);
     }
 
     if (keywords.length > 0) {
-      galleryUrlBase += `&keywords=${keywords[0]}`;
+      galleryUrlBase = galleryUrlBase.concat(`&keywords=${keywords[0]}`);
 
       for (let index = 1; index < keywords.length; index++) {
-        galleryUrlBase += `%2C${keywords[index]}`;
+        galleryUrlBase = galleryUrlBase.concat(`%2C${keywords[index]}`);
       }
     }
 
     if (media_type !== undefined) {
-      galleryUrlBase += `&media_type=${MediaType[media_type].toLowerCase()}`;
+      galleryUrlBase = galleryUrlBase.concat(
+        `&media_type=${MediaType[media_type].toLowerCase()}`
+      );
     }
 
     if (photographer !== '') {
-      galleryUrlBase += `&photographer=${photographer}`;
+      galleryUrlBase = galleryUrlBase.concat(`&photographer=${photographer}`);
     }
 
     if (secondary_creator !== '') {
-      galleryUrlBase += `&secondary_creator=${secondary_creator}`;
+      galleryUrlBase = galleryUrlBase.concat(
+        `&secondary_creator=${secondary_creator}`
+      );
     }
 
     if (title !== '') {
-      galleryUrlBase += `&title=${title}`;
+      galleryUrlBase = galleryUrlBase.concat(`&title=${title}`);
     }
 
     if (isYYYYFormat(start_year)) {
-      galleryUrlBase += `&year_start=${start_year}`;
+      galleryUrlBase = galleryUrlBase.concat(`&year_start=${start_year}`);
     } else {
       let date = new Date();
-      galleryUrlBase += `&year_start=${date.getUTCFullYear()}`;
+      galleryUrlBase = galleryUrlBase.concat(
+        `&year_start=${date.getUTCFullYear()}`
+      );
     }
 
     if (isYYYYFormat(end_year)) {
-      galleryUrlBase += `&year_end=${end_year}`;
+      galleryUrlBase = galleryUrlBase.concat(`&year_end=${end_year}`);
     }
 
     return galleryUrlBase;
   }
 
   getMarsUrl(
-    sol: string = '',
-    earth_date: string = '',
     rover: Rovers,
+    sol?: string,
+    earth_date?: string,
     camera?: MarsRoverCameras
   ): string {
-    let marsUrl = roverEndpoints[rover] || '';
+    let marsUrl = this.getMarsRoverUrl(rover);
+
+    if (sol !== undefined) marsUrl = marsUrl.concat(`&sol=${sol}`);
 
     if (camera !== undefined) {
       const cameraKey = this.getCameraKey(rover, camera);
-      if (cameraKey) marsUrl += `&camera=${cameraKey}`;
+      if (cameraKey) marsUrl = marsUrl.concat(`&camera=${cameraKey}`);
     }
 
-    if (sol !== '') marsUrl += `?sol=${sol}`;
-    if (isISO8601Date(earth_date)) marsUrl += `&earth_date=${earth_date}`;
+    if (earth_date) {
+      if (isISO8601Date(earth_date))
+        marsUrl = marsUrl.concat(`&earth_date=${earth_date}`);
+    }
 
     return marsUrl;
   }
 
   getMarsLatestUrl(rover: Rovers): string {
     const roverLatestUrls = {
-      [Rovers.Opportunity]: environment.api.marsOpportunityLatestEndpoint,
-      [Rovers.Spirit]: environment.api.marsSpiritLatestEndpoint,
-      [Rovers.Perseverance]: environment.api.marsPerseveranceLatestEndpoint,
-      [Rovers.Curiosity]: environment.api.marsCuriosityLatestEndpoint,
+      [Rovers.Opportunity]:
+        environment.api.marsLatest.marsOpportunityLatestEndpoint,
+      [Rovers.Spirit]: environment.api.marsLatest.marsSpiritLatestEndpoint,
+      [Rovers.Perseverance]:
+        environment.api.marsLatest.marsPerseveranceLatestEndpoint,
+      [Rovers.Curiosity]:
+        environment.api.marsLatest.marsCuriosityLatestEndpoint,
     };
-    return roverLatestUrls[rover];
+    return roverLatestUrls[rover].concat(
+      '?api_key=',
+      this.apiKeyService.getApiKey()
+    );
+  }
+
+  getMarsManifestUrl(rover: Rovers): string {
+    const roverManifestUrls = {
+      [Rovers.Opportunity]:
+        environment.api.marsManifests.marsCuriosityManifestEndpoint,
+      [Rovers.Spirit]:
+        environment.api.marsManifests.marsCuriosityManifestEndpoint,
+      [Rovers.Perseverance]:
+        environment.api.marsManifests.marsCuriosityManifestEndpoint,
+      [Rovers.Curiosity]:
+        environment.api.marsManifests.marsCuriosityManifestEndpoint,
+    };
+
+    return roverManifestUrls[rover].concat(
+      '?api_key=',
+      this.apiKeyService.getApiKey()
+    );
+  }
+
+  getApodUrl(date: Date): string {
+    let apodUrlBase = environment.api.apodEndpoint;
+
+    apodUrlBase = apodUrlBase.concat(
+      `?date=${convertDateToString(date)}`,
+      `&api_key=${this.apiKeyService.getApiKey()}`
+    );
+
+    return apodUrlBase;
+  }
+
+  getApodsUrl(startDate: Date, endDate: Date): string {
+    let apodUrlBase = environment.api.apodEndpoint;
+
+    apodUrlBase = apodUrlBase.concat(
+      `?start_date=${convertDateToString(startDate)}`,
+      `&end_date=${convertDateToString(endDate)}`,
+      `&api_key=${this.apiKeyService.getApiKey()}`
+    );
+
+    return apodUrlBase;
+  }
+
+  private getMarsRoverUrl(rover: Rovers): string {
+    const roverEndpoints = {
+      [Rovers.Opportunity]: environment.api.marsOpportunityEndpoint,
+      [Rovers.Spirit]: environment.api.marsSpiritEndpoint,
+      [Rovers.Perseverance]: environment.api.marsPerseveranceEndpoint,
+      [Rovers.Curiosity]: environment.api.marsCuriosityEndpoint,
+    };
+
+    return roverEndpoints[rover].concat(
+      '?api_key=',
+      this.apiKeyService.getApiKey()
+    );
   }
 
   private getCameraKey(

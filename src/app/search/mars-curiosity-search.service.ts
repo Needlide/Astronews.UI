@@ -1,17 +1,10 @@
 import { Injectable } from '@angular/core';
-import { CachingService } from '../cache/caching.service';
 import { DataService } from '../data.service';
-import { PromptService } from '../shared/prompt.service';
 import { ErrorService } from '../error.service';
-import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
-import {
-  errorMessageDataFetch,
-  minSymbolsToTriggerSearch,
-} from '../shared/constants';
-import { catchError, map, Observable, of } from 'rxjs';
-import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
-import { parseSearchTerm, parseSearchValue } from './search.util';
+import { errorMessageDataFetch } from '../shared/constants';
+import { catchError, map, Observable, of, take, tap } from 'rxjs';
+import { parseSearchTerm } from './search.util';
 import { Rovers } from '../models/mars/rovers';
 import {
   CuriosityCameras,
@@ -19,75 +12,76 @@ import {
 } from '../models/mars/rover.cameras';
 import { isISO8601Date } from '../shared/date-functions';
 import { MarsModel } from '../models/mars/mars.model';
-import { ROUTES } from '../app.routes';
+import { CachingCuriosityService } from '../cache/mars-curiosity/caching-curiosity.service';
+import { ManifestModel } from '../models/mars/manifest.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MarsCuriositySearchService {
   constructor(
-    private cacheService: CachingService,
+    private cacheService: CachingCuriosityService,
     private dataService: DataService,
-    private promptService: PromptService,
     private errorService: ErrorService,
-    private router: Router,
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search(term: string): Observable<MarsModel[]> {
-    if (!term || term.length < minSymbolsToTriggerSearch) {
-      let defaultCache = this.cacheService.get(
-        PAGE_KEYS.MARS_CURIOSITY,
-        DEFAULT_CACHE_KEYS.MARS_CURIOSITY
-      ) as MarsModel[];
-
-      if (defaultCache) {
-        return of(defaultCache);
-      } else {
-        return this.apiCallLatest();
-      }
-    }
-
-    let cache = this.cacheService.get(PAGE_KEYS.MARS_CURIOSITY, term);
+  load(sol: number): Observable<MarsModel[]> {
+    const cache = this.cacheService.getPagination(sol);
 
     if (cache) {
       return of(cache);
     }
 
-    const { property, value } = parseSearchTerm(term);
+    const requestUrl = this.urlBuilder.getMarsUrl(
+      Rovers.Curiosity,
+      sol.toString()
+    );
 
+    return this.apiCall(requestUrl).pipe(
+      take(1),
+      tap((data) => this.cacheService.setPagination(sol, data))
+    );
+  }
+
+  search(sol: number, searchTerm: string): Observable<MarsModel[]> {
+    let cache = this.cacheService.getSearch(searchTerm);
+
+    if (cache) {
+      return of(cache);
+    }
+
+    let { property, value } = parseSearchTerm(searchTerm);
+
+    if (property) {
+      return this.propertySearchLogic(sol, property, value);
+    }
+
+    return this.valueSearchLogic(sol, value);
+  }
+
+  private propertySearchLogic(sol: number, property: string, value: string) {
     switch (property?.toLowerCase()) {
       case 's':
-        const valueSign = parseSearchValue(value);
-        let sol = parseInt(
-          valueSign[0].includes('+') || valueSign[0].includes('-')
-            ? valueSign[1]
-            : valueSign[0]
-        );
-
-        let urlS = this.urlBuilder.getMarsUrl(
-          sol.toString(),
-          undefined,
-          Rovers.Curiosity
-        );
-        return this.apiCall(urlS, term);
+        let urlS = this.urlBuilder.getMarsUrl(Rovers.Curiosity, value);
+        return this.apiCall(urlS);
       case 'cn':
         let urlCn = this.urlBuilder.getMarsUrl(
-          this.promptService.MarsCuriosityCurrentSol.toString(),
-          undefined,
           Rovers.Curiosity,
+          sol.toString(),
+          undefined,
           this.parseCameraName(value)
         );
 
-        return this.apiCall(urlCn, term);
+        return this.apiCall(urlCn);
       case 'ed':
         if (isISO8601Date(value)) {
           let urlEd = this.urlBuilder.getMarsUrl(
+            Rovers.Curiosity,
             undefined,
-            value,
-            Rovers.Curiosity
+            value
           );
-          return this.apiCall(urlEd, term);
+          return this.apiCall(urlEd);
         }
         return of([]);
       default:
@@ -95,68 +89,69 @@ export class MarsCuriositySearchService {
     }
   }
 
-  private apiCall(url: string, key: string): Observable<MarsModel[]> {
+  private valueSearchLogic(
+    sol: number,
+    value: string
+  ): Observable<MarsModel[]> {
+    if (isISO8601Date(value)) {
+      let urlEd = this.urlBuilder.getMarsUrl(
+        Rovers.Curiosity,
+        undefined,
+        value
+      );
+
+      return this.apiCall(urlEd);
+    } else if (this.isInteger(value)) {
+      let urlS = this.urlBuilder.getMarsUrl(Rovers.Curiosity, value);
+
+      return this.apiCall(urlS);
+    } else {
+      let camera = this.parseCameraName(value);
+
+      if (camera) {
+        let urlCn = this.urlBuilder.getMarsUrl(
+          Rovers.Curiosity,
+          sol.toString(),
+          undefined,
+          camera
+        );
+
+        return this.apiCall(urlCn);
+      }
+    }
+
+    return of([]);
+  }
+
+  private apiCall(url: string): Observable<MarsModel[]> {
     return this.dataService.getMarsPhotos(url).pipe(
       map((responseData) => {
-        if (!responseData || responseData.photos.length == 0) {
-          return [];
-        }
+        if (!responseData || responseData.photos.length == 0) return [];
 
-        const data = responseData.photos;
-
-        // updating the current sol variable with the new value
-        // so the page knows new starting point for pagination
-        this.promptService.MarsCuriosityCurrentSol = data[0].sol;
-
-        this.cacheService.set(PAGE_KEYS.MARS_CURIOSITY, key, data);
-
-        return data;
+        return responseData.photos;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([ROUTES.error], {
-          state: { returnUrl: ROUTES.marsCuriosity },
-        });
 
         return [];
       })
     );
   }
 
-  private apiCallLatest(): Observable<MarsModel[]> {
-    return this.dataService
-      .getMarsLatestPhotos(this.urlBuilder.getMarsLatestUrl(Rovers.Curiosity))
-      .pipe(
-        map((responseData) => {
-          if (!responseData || responseData.latest_photos.length == 0) {
-            return [];
-          }
+  getManifest(): Observable<ManifestModel> {
+    let url = this.urlBuilder.getMarsManifestUrl(Rovers.Curiosity);
 
-          const data = responseData.latest_photos;
+    return this.dataService.getMarsManifest(url).pipe(
+      map((data) => data.photo_manifest),
+      catchError(() => {
+        this.errorService.sendError(errorMessageDataFetch);
 
-          // updating the current sol variable with the new value
-          // so the page knows new starting point for pagination
-          this.promptService.MarsCuriosityCurrentSol = data[0].sol;
-
-          this.cacheService.set(
-            PAGE_KEYS.MARS_CURIOSITY,
-            DEFAULT_CACHE_KEYS.MARS_CURIOSITY,
-            data
-          );
-
-          return data;
-        }),
-        catchError(() => {
-          this.errorService.sendError(errorMessageDataFetch);
-          this.router.navigate([ROUTES.error], {
-            state: { returnUrl: ROUTES.marsCuriosity },
-          });
-
-          return [];
-        })
-      );
+        return of({} as ManifestModel);
+      })
+    );
   }
 
+  // TODO add cameras to the list, like FHAZ_LEFT_B, FHAZ_RIGHT_B, RHAZ_LEFT_B, RHAZ_RIGHT_B, etc.
   // map enum of the camera names to the user's input
   private parseCameraName(value: string): MarsRoverCameras | undefined {
     switch (value.toUpperCase()) {
@@ -177,5 +172,10 @@ export class MarsCuriositySearchService {
       default:
         return undefined;
     }
+  }
+
+  private isInteger(value: string): boolean {
+    const regex = /^[0-9]+$/;
+    return regex.test(value);
   }
 }

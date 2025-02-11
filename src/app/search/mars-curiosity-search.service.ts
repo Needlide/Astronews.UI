@@ -151,7 +151,6 @@ export class MarsCuriositySearchService {
     );
   }
 
-  // TODO add cameras to the list, like FHAZ_LEFT_B, FHAZ_RIGHT_B, RHAZ_LEFT_B, RHAZ_RIGHT_B, etc.
   // map enum of the camera names to the user's input
   private parseCameraName(value: string): MarsRoverCameras | undefined {
     switch (value.toUpperCase()) {

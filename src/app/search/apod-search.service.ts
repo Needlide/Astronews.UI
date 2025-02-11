@@ -18,6 +18,7 @@ import { selectApodData } from '../apod/apod.selectors';
 import { DatePipe } from '@angular/common';
 import { Either, left, right, isLeft } from 'fp-ts/lib/Either';
 import { ApodActions } from '../apod/apod.actions';
+import { UrlBuilderService } from '../url-builder.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,10 +26,11 @@ import { ApodActions } from '../apod/apod.actions';
 export class ApodSearchService {
   constructor(
     private cacheService: CachingApodService,
+    private urlBuilderService: UrlBuilderService,
     private dataService: DataService,
     private errorService: ErrorService,
     private router: Router,
-    private store: Store,
+    private readonly store: Store,
     private datePipe: DatePipe
   ) {}
 
@@ -162,7 +164,9 @@ export class ApodSearchService {
           );
         }
 
-        return this.dataService.getApod(date).pipe(
+        let url = this.urlBuilderService.getApodUrl(date);
+
+        return this.dataService.getApod(url).pipe(
           map((apod) => right([apod])),
           catchError(() => of(left('Failed to fetch APOD data.')))
         );
@@ -188,7 +192,8 @@ export class ApodSearchService {
     endDate: Date,
     pageNumber: number
   ): Observable<ApodModel[]> {
-    return this.dataService.getApods(startDate, endDate).pipe(
+    let url = this.urlBuilderService.getApodsUrl(startDate, endDate);
+    return this.dataService.getApods(url).pipe(
       map((responseData) => {
         if (responseData.length == 0) {
           return [];

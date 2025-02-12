@@ -101,6 +101,7 @@ export class UrlBuilderService {
 
   getGalleryUrl(
     limit: number = 60,
+    page: number = 1,
     free_search: string = '',
     center: string = '',
     description: string = '',
@@ -115,6 +116,8 @@ export class UrlBuilderService {
     let galleryUrlBase = environment.api.nasaEndpoint;
 
     galleryUrlBase = galleryUrlBase.concat(`?page_size=${limit}`);
+
+    galleryUrlBase = galleryUrlBase.concat(`&page=${page}`);
 
     if (free_search !== '') {
       galleryUrlBase = galleryUrlBase.concat(`&q=${free_search}`);

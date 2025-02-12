@@ -1,4 +1,3 @@
-import { LinkModel } from '../gallery/link.model';
 import { GalleryModel } from './gallery.model';
 
 export interface GalleryRootModel {
@@ -9,8 +8,8 @@ interface Collection {
   version: string;
   href: string;
   items: Data[];
-  metadata: Object;
-  links: LinkObject[];
+  metadata: Metadata;
+  links: Links[];
 }
 
 export interface Data {
@@ -19,12 +18,21 @@ export interface Data {
   links: LinkModel[];
 }
 
-interface Object {
+interface Metadata {
   total_hits: number;
 }
 
-interface LinkObject {
+interface Links {
   rel: string;
   prompt: string;
   href: string;
+}
+
+interface LinkModel {
+  href: string;
+  rel: string;
+  render: string;
+  width: number;
+  size: number;
+  height: number;
 }

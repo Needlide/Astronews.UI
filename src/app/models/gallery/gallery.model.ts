@@ -7,4 +7,6 @@ export interface GalleryModel {
   nasa_id: string;
   title: string;
   album: string[];
+  photographer: string;
+  location: string;
 }

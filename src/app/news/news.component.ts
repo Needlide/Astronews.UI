@@ -141,7 +141,7 @@ export class NewsComponent implements OnInit, OnDestroy {
     const searchTermSub = this.searchTerm$
       .pipe(skip(1))
       .subscribe((searchText) => {
-        if (searchText && searchText.length > minSymbolsToTriggerSearch) {
+        if (searchText) {
           this.store.dispatch(NewsActions.initiateSearch());
         } else if (searchText === '') {
           this.store.dispatch(NewsActions.loadData());

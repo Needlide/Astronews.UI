@@ -119,11 +119,15 @@ export class NewsEffects {
   setPage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(NewsActions.setPage),
-      withLatestFrom(this.store.select(selectNewsItemsPerPage)),
-      mergeMap(([action, itemsPerPage]) =>
-        this.searchService.load(action.currentPage, itemsPerPage).pipe(
-          map((data) => NewsActions.loadDataSuccess({ data })),
-          catchError((error) => of(NewsActions.loadDataFailure({ error })))
+      switchMap((action) =>
+        this.store.select(selectNewsItemsPerPage).pipe(
+          take(1),
+          switchMap((itemsPerPage) =>
+            this.searchService.load(action.currentPage, itemsPerPage).pipe(
+              map((data) => NewsActions.loadDataSuccess({ data })),
+              catchError((error) => of(NewsActions.loadDataFailure({ error })))
+            )
+          )
         )
       )
     )

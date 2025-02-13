@@ -4,7 +4,7 @@ export interface GalleryRootModel {
   collection: Collection;
 }
 
-interface Collection {
+export interface Collection {
   version: string;
   href: string;
   items: Data[];

@@ -1,67 +1,104 @@
 import { Injectable } from '@angular/core';
-import { CachingService } from '../cache/caching.service';
 import { DataService } from '../data.service';
-import {
-  errorMessageDataFetch,
-  minSymbolsToTriggerSearch,
-} from '../shared/constants';
-import { DEFAULT_CACHE_KEYS, PAGE_KEYS } from '../cache/cache-keys';
+import { errorMessageDataFetch } from '../shared/constants';
 import { parseSearchTerm, parseSearchValue } from './search.util';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, take, tap } from 'rxjs';
 import { ErrorService } from '../error.service';
-import { Router } from '@angular/router';
 import { UrlBuilderService } from '../url-builder.service';
-import { Data } from '../models/gallery/gallery.root.model';
-import { ROUTES } from '../app.routes';
+import { Collection } from '../models/gallery/gallery.root.model';
+import { CachingGalleryService } from '../cache/nasa-gallery/caching-gallery.service';
+import { GalleryCache } from '../models/cache/gallery-cache.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GallerySearchService {
   constructor(
-    private cacheService: CachingService,
+    private cacheService: CachingGalleryService,
     private dataService: DataService,
     private errorService: ErrorService,
-    private router: Router,
     private urlBuilder: UrlBuilderService
   ) {}
 
-  search(term: string): Observable<Data[]> {
-    if (!term || term.length < minSymbolsToTriggerSearch) {
-      let defaultCache = this.cacheService.get(
-        PAGE_KEYS.NASA_GALLERY,
-        DEFAULT_CACHE_KEYS.NASA_GALLERY
-      ) as Data[];
+  load(pageNumber: number, itemsPerPage: number): Observable<GalleryCache> {
+    const cache = this.loadPageFromCache(pageNumber);
 
-      if (defaultCache) {
-        return of(defaultCache);
-      } else {
-        let defaultUrl = this.urlBuilder.getGalleryUrl();
-        return this.apiCall(defaultUrl, DEFAULT_CACHE_KEYS.NASA_GALLERY);
-      }
-    }
+    if (cache) return of(cache);
 
-    let cache = this.cacheService.get(PAGE_KEYS.NASA_GALLERY, term);
+    const requestUrl = this.urlBuilder.getGalleryUrl(itemsPerPage, pageNumber);
 
-    if (cache) {
-      return of(cache);
-    }
-
-    let defaultCache = this.cacheService.get(
-      PAGE_KEYS.NASA_GALLERY,
-      DEFAULT_CACHE_KEYS.NASA_GALLERY
+    return this.apiCall(requestUrl).pipe(
+      take(1),
+      tap((data) =>
+        this.cacheService.setPagination(
+          pageNumber,
+          data.items,
+          data.metadata.total_hits
+        )
+      ),
+      map((data) => {
+        return {
+          data: data.items,
+          expiry: 0,
+          totalItems: data.metadata.total_hits,
+        } as GalleryCache;
+      })
     );
+  }
 
-    if (!defaultCache) {
-      return of([]);
-    }
+  search(
+    searchTerm: string,
+    cacheKey: string,
+    pageNumber: number,
+    itemsPerPage: number
+  ): Observable<GalleryCache> {
+    let cache = this.loadSearchPageFromCache(pageNumber, cacheKey);
 
-    const { property, value } = parseSearchTerm(term);
+    if (cache) return of(cache);
+
+    return this.searchLogic(searchTerm, itemsPerPage, pageNumber).pipe(
+      take(1),
+      tap((data) =>
+        this.cacheService.setSearch(
+          cacheKey,
+          data.items,
+          data.metadata.total_hits,
+          pageNumber
+        )
+      ),
+      map((data) => {
+        return {
+          data: data.items,
+          expiry: 0,
+          totalItems: data.metadata.total_hits,
+        } as GalleryCache;
+      })
+    );
+  }
+
+  private loadPageFromCache(pageNumber: number): GalleryCache | null {
+    let cache = this.cacheService.getPagination(pageNumber);
+
+    return cache;
+  }
+
+  private loadSearchPageFromCache(
+    pageNumber: number,
+    cacheKey: string
+  ): GalleryCache | null {
+    let cache = this.cacheService.getSearch(cacheKey, pageNumber);
+
+    return cache;
+  }
+
+  private searchLogic(searchTerm: string, itemsPerPage: number, page: number) {
+    const { property, value } = parseSearchTerm(searchTerm);
 
     switch (property?.toLowerCase()) {
       case 't':
         let urlT = this.urlBuilder.getGalleryUrl(
-          undefined,
+          itemsPerPage,
+          page,
           undefined,
           undefined,
           undefined,
@@ -72,22 +109,29 @@ export class GallerySearchService {
           value
         );
 
-        return this.apiCall(urlT, term);
+        return this.apiCall(urlT);
       case 'd':
         let urlD = this.urlBuilder.getGalleryUrl(
-          undefined,
+          itemsPerPage,
+          page,
           undefined,
           undefined,
           value
         );
 
-        return this.apiCall(urlD, term);
+        return this.apiCall(urlD);
       case 'c':
-        let urlC = this.urlBuilder.getGalleryUrl(undefined, undefined, value);
-        return this.apiCall(urlC, term);
+        let urlC = this.urlBuilder.getGalleryUrl(
+          itemsPerPage,
+          page,
+          undefined,
+          value
+        );
+        return this.apiCall(urlC);
       case 'dc':
         let urlDC = this.urlBuilder.getGalleryUrl(
-          undefined,
+          itemsPerPage,
+          page,
           undefined,
           undefined,
           undefined,
@@ -99,20 +143,22 @@ export class GallerySearchService {
           value
         );
 
-        return this.apiCall(urlDC, term);
+        return this.apiCall(urlDC);
       case 'k':
         let urlK = this.urlBuilder.getGalleryUrl(
-          undefined,
+          itemsPerPage,
+          page,
           undefined,
           undefined,
           undefined,
           parseSearchValue(value)
         );
 
-        return this.apiCall(urlK, term);
+        return this.apiCall(urlK);
       case 'ni':
         let urlP = this.urlBuilder.getGalleryUrl(
-          undefined,
+          itemsPerPage,
+          page,
           undefined,
           undefined,
           undefined,
@@ -121,37 +167,31 @@ export class GallerySearchService {
           value
         );
 
-        return this.apiCall(urlP, term);
+        return this.apiCall(urlP);
       default:
-        return of([]);
+        let urlSearchDefault = this.urlBuilder.getGalleryUrl(
+          itemsPerPage,
+          page,
+          value
+        );
+        return this.apiCall(urlSearchDefault);
     }
   }
 
-  private apiCall(url: string, key: string) {
+  private apiCall(url: string): Observable<Collection> {
     return this.dataService.getNasaGallery(url).pipe(
       map((responseData) => {
-        // if length of the response is 0 return an empty array
+        responseData.collection;
         if (responseData.collection.items.length === 0) {
-          return [];
+          return {} as Collection;
         }
 
-        const data = responseData.collection.items;
-
-        // find and assign the url of the next prompt
-        const nextUrlRetrieved = responseData.collection.links.find(
-          (x) => x.prompt === 'Next'
-        )?.href;
-
-        // set the data in the cache
-        this.cacheService.set(PAGE_KEYS.NASA_GALLERY, key, data);
+        const data = responseData.collection;
 
         return data;
       }),
       catchError(() => {
         this.errorService.sendError(errorMessageDataFetch);
-        this.router.navigate([ROUTES.error], {
-          state: { returnUrl: ROUTES.nasaGallery },
-        });
 
         return [];
       })

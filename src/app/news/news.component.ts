@@ -152,13 +152,11 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   onPageChanged(page: number): void {
-    this.isSearchState$.pipe(take(1)).subscribe((isSearchState) => {
-      if (isSearchState) {
-        this.searchPageChanged(page);
-      } else {
-        this.pageChanged(page);
-      }
-    });
+    if (this.isSearchState) {
+      this.searchPageChanged(page);
+    } else {
+      this.pageChanged(page);
+    }
   }
 
   private pageChanged(page: number): void {
@@ -170,13 +168,11 @@ export class NewsComponent implements OnInit, OnDestroy {
   }
 
   onItemsPerPageChanged(itemsPerPage: number): void {
-    this.isSearchState$.pipe(take(1)).subscribe((isSearchState) => {
-      if (isSearchState) {
-        this.searchItemsPerPageChanged(itemsPerPage);
-      } else {
-        this.itemsPerPageChanged(itemsPerPage);
-      }
-    });
+    if (this.isSearchState) {
+      this.searchItemsPerPageChanged(itemsPerPage);
+    } else {
+      this.itemsPerPageChanged(itemsPerPage);
+    }
   }
 
   private itemsPerPageChanged(itemsPerPage: number): void {

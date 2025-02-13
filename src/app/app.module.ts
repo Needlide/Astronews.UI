@@ -11,12 +11,15 @@ import { NewsComponent } from './news/news.component';
 import { MarsPhotosCuriosityComponent } from './mars-photos-curiosity/mars-photos-curiosity.component';
 import { NasaGalleryComponent } from './nasa-gallery/nasa-gallery.component';
 import { APODComponent } from './apod/apod.component';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { AuthInterceptorService } from './api-key/auth-interceptor.service';
 import { ErrorComponent } from './error/error.component';
 import { HeaderComponent } from './header/header.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { SortPipe } from './shared/sort.pipe';
 //import { MarsPhotosOpportunityComponent } from './mars-photos-opportunity/mars-photos-opportunity.component';
 //import { MarsPhotosSpiritComponent } from './mars-photos-spirit/mars-photos-spirit.component';
@@ -63,8 +66,6 @@ import { DatePipe } from '@angular/common';
     BrowserModule,
     FormsModule,
     AppRoutingModule,
-    HttpClientModule,
-    InfiniteScrollModule,
     SearchBarComponent,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: true,
@@ -93,6 +94,7 @@ import { DatePipe } from '@angular/common';
       multi: true,
     },
     DatePipe,
+    provideHttpClient(withInterceptorsFromDi()),
   ],
   bootstrap: [AppComponent],
 })

@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ICachingService } from '../caching-service.interface';
 import { GalleryCache } from '@/app/models/cache/gallery-cache.model';
 import { Data } from '@/app/models/gallery/gallery.root.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CachingGalleryService implements ICachingService<Data[]> {
+export class CachingGalleryService {
   private _paginationCache: Map<number, GalleryCache> = new Map();
   private _searchCache: Map<number, Map<string, GalleryCache>> = new Map();
 
@@ -15,15 +14,21 @@ export class CachingGalleryService implements ICachingService<Data[]> {
 
   constructor() {}
 
-  setPagination(page: number, value: Data[], ttl: number = this._ttl): void {
+  setPagination(
+    page: number,
+    value: Data[],
+    totalItems: number,
+    ttl: number = this._ttl
+  ): void {
     const expiry = Date.now() + ttl;
 
-    this._paginationCache.set(page, { data: value, expiry });
+    this._paginationCache.set(page, { data: value, expiry, totalItems });
   }
 
   setSearch(
     key: string,
     value: Data[],
+    totalItems: number,
     page: number,
     ttl: number = this._ttl
   ): void {
@@ -31,15 +36,20 @@ export class CachingGalleryService implements ICachingService<Data[]> {
       this._searchCache.get(page) || new Map<string, GalleryCache>();
     const expiry = Date.now() + ttl;
 
-    pageCache.set(key.toLowerCase(), { data: value, expiry });
+    pageCache.set(key.toLowerCase(), {
+      data: value,
+      expiry,
+      totalItems,
+    });
+
     this._searchCache.set(page, pageCache);
   }
 
-  getPagination(page: number): Data[] | null {
+  getPagination(page: number): GalleryCache | null {
     return this.getValidCache(this._paginationCache.get(page));
   }
 
-  getSearch(key: string, page: number): Data[] | null {
+  getSearch(key: string, page: number): GalleryCache | null {
     const pageCache = this._searchCache.get(page);
 
     const cache = pageCache ? pageCache.get(key.toLowerCase()) : undefined;
@@ -72,9 +82,9 @@ export class CachingGalleryService implements ICachingService<Data[]> {
     this._searchCache.clear();
   }
 
-  private getValidCache(cache: GalleryCache | undefined): Data[] | null {
+  private getValidCache(cache: GalleryCache | undefined): GalleryCache | null {
     if (!cache) return null;
     if (Date.now() > cache.expiry) return null;
-    return cache.data;
+    return cache;
   }
 }

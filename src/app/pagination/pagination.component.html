@@ -1,0 +1,38 @@
+<div class="pagination-controls">
+  @if (displayItemsPerPage) {
+  <div class="items-per-page">
+    <label for="itemsPerPage">Items per page:</label>
+    <select
+      id="itemsPerPage"
+      [(ngModel)]="selectedItemsPerPage"
+      (ngModelChange)="onItemsPerPageChange()"
+    >
+      @for (item of itemsPerPage; track $index) {
+      <option [value]="item">
+        {{ item }}
+      </option>
+      }
+    </select>
+  </div>
+  }
+
+  <div class="pagination">
+    <button
+      class="prev-page-btn"
+      (click)="changePage(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      aria-label="Go to previous page"
+    >
+      Previous
+    </button>
+    <span>{{ currentPage }} / {{ totalPages }}</span>
+    <button
+      class="next-page-btn"
+      (click)="changePage(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+      aria-label="Go to next page"
+    >
+      Next
+    </button>
+  </div>
+</div>

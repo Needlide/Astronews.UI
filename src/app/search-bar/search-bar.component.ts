@@ -1,39 +1,40 @@
-import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
-import { SearchService } from '../search.service';
-import { Subject, debounceTime } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { SearchService } from '../search/search.service';
+import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
   selector: 'app-search-bar',
   standalone: true,
   imports: [FormsModule],
   templateUrl: './search-bar.component.html',
-  styleUrl: './search-bar.component.scss'
+  styleUrl: './search-bar.component.scss',
 })
-export class SearchBarComponent implements OnInit {
+export class SearchBarComponent implements OnInit, OnDestroy {
   public searchTerm: string = '';
-  private searchSubject = new Subject<string>();
-
-  @Input() debounceTimeDuration: number = 730;
-  // Notify the parent components about changes in search term
-  @Output() searchChange = new EventEmitter<string>();
+  private searchSubscription: Subscription = new Subscription();
 
   constructor(private searchService: SearchService) {}
 
   ngOnInit(): void {
-    this.searchSubject.pipe(debounceTime(this.debounceTimeDuration)).subscribe((searchText) => {
-      this.searchService.setSearchTerm(searchText);
-      this.searchChange.emit(searchText); // Emit the search term change to a parent
-    });
+    this.searchSubscription = this.searchService.searchTerm$.subscribe(
+      (searchText) => {
+        this.searchTerm = searchText;
+      }
+    );
   }
 
   clearSearch(): void {
     this.searchService.setSearchTerm('');
     this.searchTerm = '';
-    this.searchChange.emit('');
   }
 
   onSearchTermChange(): void {
-    this.searchSubject.next(this.searchTerm);
+    this.searchService.setSearchTerm(this.searchTerm);
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubscription.unsubscribe();
   }
 }

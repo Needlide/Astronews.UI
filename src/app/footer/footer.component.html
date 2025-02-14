@@ -11,7 +11,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/News"
+              [routerLink]="routes.news"
               >News</a
             >
           </li>
@@ -20,7 +20,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/MarsPhotos/Curiosity"
+              [routerLink]="routes.marsCuriosity"
               >Curiosity</a
             >
           </li>
@@ -29,7 +29,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/NasaGallery"
+              [routerLink]="routes.nasaGallery"
               >NASA</a
             >
           </li>
@@ -38,7 +38,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/APOD"
+              [routerLink]="routes.apod"
               >APOD</a
             >
           </li>

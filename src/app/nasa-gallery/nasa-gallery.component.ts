@@ -1,270 +1,208 @@
-import { Component, numberAttribute } from '@angular/core';
-import { DataService } from '../data.service';
-import { ErrorService } from '../error.service';
-import { Router } from '@angular/router';
-import { Data } from '../models/gallery.root.model';
-import { PromptService } from '../prompt.service';
-import { SearchService } from '../search.service';
-import { parseSearchTerm, parseSearchValue } from '../search.util';
-import { UrlBuilderService } from '../url-builder.service';
-import { CachingService } from '../caching.service';
-import { lastValueFrom } from 'rxjs';
-import { GalleryCache } from '../models/gallery-cache-model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Data } from '../models/gallery/gallery.root.model';
+import { Observable, skip, Subscription, take } from 'rxjs';
+import { Store } from '@ngrx/store';
+import {
+  selectNasaGalleryData,
+  selectNasaGalleryError,
+  selectNasaGalleryLoading,
+  selectNasaGalleryItemsPerPage,
+  selectNasaGalleryPage,
+  selectNasaGallerySearchQuery,
+  selectNasaGalleryTotalItems,
+  selectNasaGallerySearchPage,
+  selectNasaGalleryTotalSearchItems,
+  selectNasaGallerySearchItemsPerPage,
+  selectNasaGalleryIsSearchState,
+} from './nasa-gallery.selectors';
+import { NasaGalleryState } from './nasa-gallery.reducer';
+import { NasaGalleryActions } from './nasa-gallery.actions';
+import { SearchService } from '../search/search.service';
+import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
   selector: 'app-nasa-gallery',
   templateUrl: './nasa-gallery.component.html',
   styleUrls: ['./nasa-gallery.component.scss'],
 })
-export class NasaGalleryComponent {
-  data: Data[] = [];
-  private cacheKeyword: string = '';
-  isSearchMode: boolean = false;
-  isDataAvailable: boolean = false;
-  private readonly currentUrl: string = '/NasaGallery';
+export class NasaGalleryComponent implements OnInit, OnDestroy {
+  data$: Observable<Data[]> = this.store.select(selectNasaGalleryData);
+  isLoading$: Observable<boolean> = this.store.select(selectNasaGalleryLoading);
+  error$: Observable<string | null> = this.store.select(selectNasaGalleryError);
+  currentPage$: Observable<number> = this.store.select(selectNasaGalleryPage);
+  currentSearchPage$: Observable<number> = this.store.select(
+    selectNasaGallerySearchPage
+  );
+  totalItems$: Observable<number> = this.store.select(
+    selectNasaGalleryTotalItems
+  );
+  totalSearchItems$: Observable<number> = this.store.select(
+    selectNasaGalleryTotalSearchItems
+  );
+  itemsPerPage$: Observable<number> = this.store.select(
+    selectNasaGalleryItemsPerPage
+  );
+  searchItemsPerPage$: Observable<number> = this.store.select(
+    selectNasaGallerySearchItemsPerPage
+  );
+  isSearchState$: Observable<boolean> = this.store.select(
+    selectNasaGalleryIsSearchState
+  );
+  searchTerm$: Observable<string> = this.store.select(
+    selectNasaGallerySearchQuery
+  );
+
+  private _subscriptions: Subscription[] = [];
+
+  isSearchState: boolean = false;
+  isLoading: boolean = false;
+  error: string | null = null;
+  currentPage: number = 1;
+  currentSearchPage: number = 1;
+  totalItems: number = 0;
+  totalSearchItems: number = 0;
+  itemsPerPage: number = 0;
+  searchItemsPerPage: number = 0;
 
   constructor(
-    private apiCaller: DataService,
-    private errorService: ErrorService,
-    private router: Router,
-    private promptService: PromptService,
-    private searchService: SearchService,
-    urlBuilder: UrlBuilderService,
-    private cacheService: CachingService
-  ) {
-    this.searchService.searchTerm$.subscribe((term) => {
-      if (term && term.length > 2) {
-        const { property, value } = parseSearchTerm(term);
-        this.isSearchMode = value !== '';
+    private store: Store<NasaGalleryState>,
+    private searchService: SearchService
+  ) {}
 
-        if (this.isSearchMode && property != null) {
-          this.cacheKeyword = term;
+  ngOnInit(): void {
+    this.setupSubscriptions();
+    this.loadData();
+    this.trackSearchTerm();
+  }
 
-          switch (property?.toLowerCase()) {
-            case 't':
-              let cache_t = this.cacheService.get(this.cacheKeyword);
+  private setupSubscriptions(): void {
+    const searchStateSub = this.isSearchState$.subscribe(
+      (searchState) => (this.isSearchState = searchState)
+    );
 
-              if (cache_t) {
-                this.data = cache_t.data;
-                this.promptService.LibraryNext = cache_t.nextUrl;
-              } else {
-                let urlT = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  value
-                );
+    const loadingSub = this.isLoading$.subscribe(
+      (isLoading) => (this.isLoading = isLoading)
+    );
 
-                this.clearApiCall(urlT, this.cacheKeyword);
-              }
-              break;
-            case 'd':
-              let cache_d = this.cacheService.get(this.cacheKeyword);
+    const errorSub = this.error$.subscribe((error) => (this.error = error));
 
-              if (cache_d) {
-                this.data = cache_d.data;
-                this.promptService.LibraryNext = cache_d.nextUrl;
-              } else {
-                let urlD = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  value
-                );
-
-                this.clearApiCall(urlD, this.cacheKeyword);
-              }
-              break;
-            case 'c':
-              let cache_c = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_c) {
-                this.data = cache_c.data;
-                this.promptService.LibraryNext = cache_c.nextUrl;
-              } else {
-                let urlC = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  value
-                );
-
-                this.clearApiCall(urlC, this.cacheKeyword);
-              }
-              break;
-            case 'dc':
-              let cache_dc = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_dc) {
-                this.data = cache_dc.data;
-                this.promptService.LibraryNext = cache_dc.nextUrl;
-              } else {
-                let urlDC = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  value
-                );
-
-                this.clearApiCall(urlDC, this.cacheKeyword);
-              }
-              break;
-            case 'k':
-              let cache_k = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_k) {
-                this.data = cache_k.data;
-                this.promptService.LibraryNext = cache_k.nextUrl;
-              } else {
-                let urlK = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  parseSearchValue(value)
-                );
-
-                this.clearApiCall(urlK, this.cacheKeyword);
-              }
-              break;
-            case 'ni':
-              let cache_p = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_p) {
-                this.data = cache_p.data;
-                this.promptService.LibraryNext = cache_p.nextUrl;
-              } else {
-                let urlP = urlBuilder.getGalleryUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  value
-                );
-
-                this.clearApiCall(urlP, this.cacheKeyword);
-              }
-              break;
-          }
-        } else if (this.isSearchMode) {
-          this.cacheKeyword = value;
-          let cache = cacheService.get(value);
-
-          if (cache) {
-            this.data = cache.data;
-            this.promptService.LibraryNext = cache.nextUrl;
-          } else {
-            let url = urlBuilder.getGalleryUrl(undefined, value);
-            this.clearApiCall(url, value);
-          }
-        }
+    const searchSub = this.searchService.searchTerm$.subscribe((searchText) => {
+      if (searchText && searchText.length > minSymbolsToTriggerSearch) {
+        this.store.dispatch(
+          NasaGalleryActions.setSearchQuery({
+            searchTerm: searchText,
+          })
+        );
       } else {
-        let urlEmpty = urlBuilder.getGalleryUrl();
-        this.cacheKeyword = urlEmpty;
-        let cache = cacheService.get(this.cacheKeyword);
+        this.store.dispatch(
+          NasaGalleryActions.setSearchQuery({ searchTerm: '' })
+        );
+      }
+    });
 
-        if (cache) {
-          this.data = cache.data;
-          this.promptService.LibraryNext = cache.nextUrl;
-        } else {
-          this.clearApiCall(urlEmpty, this.cacheKeyword);
+    const currentPageSub = this.currentPage$.subscribe(
+      (currentPage) => (this.currentPage = currentPage)
+    );
+
+    const searchPageSub = this.currentSearchPage$.subscribe(
+      (currentPage) => (this.currentSearchPage = currentPage)
+    );
+
+    const totalItemsSub = this.totalItems$.subscribe((totalItems) => {
+      this.totalItems = totalItems;
+    });
+
+    const totalSearchItemsSub = this.totalSearchItems$.subscribe(
+      (totalItems) => (this.totalSearchItems = totalItems)
+    );
+
+    const itemsPerPageSub = this.itemsPerPage$.subscribe(
+      (itemsPerPage) => (this.itemsPerPage = itemsPerPage)
+    );
+
+    const searchItemsPerPageSub = this.searchItemsPerPage$.subscribe(
+      (itemsPerPage) => (this.searchItemsPerPage = itemsPerPage)
+    );
+
+    this._subscriptions.push(
+      searchStateSub,
+      loadingSub,
+      errorSub,
+      searchSub,
+      currentPageSub,
+      searchPageSub,
+      totalItemsSub,
+      totalSearchItemsSub,
+      itemsPerPageSub,
+      searchItemsPerPageSub
+    );
+  }
+
+  private loadData(): void {
+    this.store.dispatch(NasaGalleryActions.loadData());
+  }
+
+  private trackSearchTerm(): void {
+    const searchTermSub = this.searchTerm$
+      .pipe(skip(1))
+      .subscribe((searchText) => {
+        if (searchText) {
+          this.store.dispatch(NasaGalleryActions.initiateSearch());
+        } else if (searchText === '') {
+          this.store.dispatch(NasaGalleryActions.loadData());
         }
+      });
+
+    this._subscriptions.push(searchTermSub);
+  }
+
+  onPageChanged(page: number): void {
+    if (this.isSearchState) {
+      this.searchPageChanged(page);
+    } else {
+      this.pageChanged(page);
+    }
+  }
+
+  private pageChanged(page: number): void {
+    this.store.dispatch(NasaGalleryActions.setPage({ currentPage: page }));
+  }
+
+  private searchPageChanged(page: number): void {
+    this.store.dispatch(NasaGalleryActions.setSearchPage({ searchPage: page }));
+  }
+
+  onItemsPerPageChanged(itemsPerPage: number): void {
+    if (this.isSearchState) {
+      this.searchItemsPerPageChanged(itemsPerPage);
+    } else {
+      this.itemsPerPageChanged(itemsPerPage);
+    }
+  }
+
+  private itemsPerPageChanged(itemsPerPage: number): void {
+    this.itemsPerPage$.pipe(take(1)).subscribe((itemsPerPageOld) => {
+      if (itemsPerPage !== itemsPerPageOld) {
+        this.store.dispatch(
+          NasaGalleryActions.setItemsPerPage({ itemsPerPage })
+        );
       }
     });
   }
 
-  async onScrollDown() {
-    if (!this.isSearchMode) {
-      await this.apiCall(this.promptService.LibraryNext, this.cacheKeyword);
-    }
-  }
-
-  private async apiCall(url: string, key: string) {
-    if (!url) {
-      this.isDataAvailable = false;
-      return;
-    }
-    try {
-      const responseData = await lastValueFrom(
-        this.apiCaller.getNasaGallery(url)
-      );
-
-      if (responseData.collection.items.length == 0) {
-        return;
+  private searchItemsPerPageChanged(itemsPerPage: number): void {
+    this.searchItemsPerPage$.pipe(take(1)).subscribe((itemsPerPageOld) => {
+      if (itemsPerPage !== itemsPerPageOld) {
+        this.store.dispatch(
+          NasaGalleryActions.setSearchItemsPerPage({
+            searchItemsPerPage: itemsPerPage,
+          })
+        );
       }
-
-      let nextUrl = responseData.collection.links.find(
-        (x) => x.prompt == 'Next'
-      )?.href;
-
-      if (nextUrl) {
-        if (nextUrl != url) {
-          this.data = [...this.data, ...responseData.collection.items];
-          this.promptService.LibraryNext = nextUrl;
-          let galleryCache: GalleryCache;
-          galleryCache = { nextUrl: nextUrl, data: this.data };
-          this.cacheService.set(key, galleryCache);
-          this.isDataAvailable = true;
-        }
-      } else {
-        this.isDataAvailable = false;
-      }
-    } catch (error) {
-      this.errorService.sendError(
-        'Error occured during data fetch. Please, try again shortly.'
-      );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
-    }
+    });
   }
 
-  private async clearApiCall(url: string, key: string) {
-    try {
-      const responseData = await lastValueFrom(
-        this.apiCaller.getNasaGallery(url)
-      );
-
-      if (responseData.collection.items.length == 0) {
-        return;
-      }
-
-      this.data = responseData.collection.items;
-
-      let nextUrlRetrieved = responseData.collection.links.find(
-        (x) => x.prompt == 'Next'
-      )?.href;
-
-      let galleryCache = {} as GalleryCache;
-
-      galleryCache.data = responseData.collection.items;
-
-      const nextUrl = nextUrlRetrieved || '';
-      galleryCache.nextUrl = nextUrl;
-      this.isDataAvailable = !!nextUrl;
-      this.promptService.LibraryNext = nextUrl;
-
-      this.cacheService.set(key, galleryCache);
-    } catch (error) {
-      
-      this.errorService.sendError(
-        'Error occured during data fetch. Please, try again shortly.'
-      );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
-    }
-  }
-
-  async nextPage() {
-    await this.apiCall(this.promptService.LibraryNext, this.cacheKeyword);
-  }
+  ngOnDestroy(): void {
+    this._subscriptions.forEach((sub) => sub.unsubscribe());
+  } //TODO fix layout in component.html
 }

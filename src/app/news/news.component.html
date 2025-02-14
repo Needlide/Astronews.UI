@@ -1,47 +1,63 @@
-<div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
+<div>
+  @if (error) {
+  <div class="error-message">
+    <p>Error: {{ error }}</p>
+  </div>
+  } @if (!(error) && !(data$ | async)?.length && !(isLoading)) {
+  <div>
+    <p class="error-message">No data available.</p>
+  </div>
+  } @if ((isLoading) && !(error)) {
+  <app-loading-spinner />
+  } @if (!(error) && (data$ | async); as data) {
+  <div>
+    @if (data.length > 0) {
+    <section class="container content">
+      @for (item of data; track $index) {
+      <div>
+        @if (item.url && item.title && item.image_url && item.news_site) {
+        <article class="tile">
+          <h2 style="text-align: center">
+            {{ item.title }}
+          </h2>
 
-<section
-  class="container content"
-  *ngIf="data.length > 0"
-  infiniteScroll="!isSearchMode"
-  [infiniteScrollDistance]="2"
-  [infiniteScrollThrottle]="100"
-  (scrolled)="onScrollDown()"
->
-  <article class="tile" *ngFor="let item of data; let i = index">
-    <!--<svg
-      class="save-icon"
-      (mouseenter)="onMouseEnter(i)"
-      (mouseleave)="onMouseLeave(i)"
-      (click)="onMouseClick(i)"
-    >
-      <use [attr.xlink:href]="getIcon(i)"></use>
-    </svg>-->
+          <a [href]="item.url" target="_blank">
+            <img [src]="item.image_url" alt="Article Image" />
+          </a>
 
-    <h2 *ngIf="item.image_url && item.title" style="text-align: center">
-      {{ item.title }}
-    </h2>
+          @if (item.summary) {
+          <p class="tile-summary">{{ item.summary }}</p>
+          }
 
-    <img *ngIf="item.image_url && item.title" [src]="item.image_url" />
+          <div>
+            <div class="link-wrapper">
+              <a class="tile-link" [href]="item.url" target="_blank">{{
+                item.news_site
+              }}</a>
+            </div>
 
-    <p class="tile-summary" *ngIf="item.summary">{{ item.summary }}</p>
-
-    <div>
-      <div class="link-wrapper">
-        <a
-          class="tile-link"
-          *ngIf="item.news_site"
-          [href]="item.url"
-          target="_blank"
-          >{{ item.news_site }}</a
-        >
+            @if (item.published_at) {
+            <p>
+              {{ item.published_at | dateFormat }}
+            </p>
+            }
+          </div>
+        </article>
+        }
       </div>
-
-      <p *ngIf="item.published_at">{{ item.published_at | dateFormat }}</p>
-    </div>
-  </article>
-</section>
-
-<div *ngIf="isSearchMode" class="pagination-controls">
-  <button [disabled]="!isDataAvailable" (click)="nextPage()">Next</button>
+      }
+      <app-pagination
+        [currentPage]="isSearchState ? currentSearchPage : currentPage"
+        [displayItemsPerPage]="true"
+        [totalItems]="isSearchState ? totalSearchItems : totalItems"
+        [selectedItemsPerPage]="
+          isSearchState ? searchItemsPerPage : itemsPerPage
+        "
+        (pageChanged)="onPageChanged($event)"
+        (itemsPerPageChanged)="onItemsPerPageChanged($event)"
+      />
+    </section>
+    }
+  </div>
+  }
 </div>

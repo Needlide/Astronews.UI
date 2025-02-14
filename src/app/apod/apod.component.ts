@@ -1,189 +1,123 @@
-import { Component } from '@angular/core';
-import { ApodModel } from '../models/apod.model';
-import { DataService } from '../data.service';
-import { ErrorService } from '../error.service';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ApodModel } from '../models/apod/apod.model';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { SearchService } from '../search.service';
-import { parseSearchTerm } from '../search.util';
-import { CachingService } from '../caching.service';
-import { lastValueFrom } from 'rxjs';
+import { map, Observable, skip, switchMap, take, tap } from 'rxjs';
+import {
+  subtractDayFromDate,
+  subtractMonthFromDate,
+} from '../shared/date-functions';
+import { Store } from '@ngrx/store';
+import { ApodState } from './apod.reducer';
+import {
+  selectApodData,
+  selectApodError,
+  selectApodLoading,
+  selectApodPage,
+  selectApodPaginationEnabled,
+  selectApodTotalItems,
+} from './apod.selectors';
+import { ApodActions } from './apod.actions';
+import { SearchService } from '../search/search.service';
+import {
+  minSymbolsToTriggerSearch,
+  firstDateForApod,
+} from '../shared/constants';
 
 @Component({
   selector: 'app-apod',
   templateUrl: './apod.component.html',
   styleUrls: ['./apod.component.scss'],
 })
-export class APODComponent {
-  data: ApodModel[] = [];
-  date: Date;
-  isDataUpdated: boolean = false;
-  private readonly CacheKeyword: string = 'APOD_DEFAULT';
-  isSearchMode: boolean = false;
-  private readonly currentUrl: string = '/APOD';
+export class APODComponent implements OnInit {
+  data$: Observable<ApodModel[]> = this.store.select(selectApodData);
+  isLoading$: Observable<boolean> = this.store.select(selectApodLoading);
+  error$: Observable<string | null> = this.store.select(selectApodError);
+  currentPage$: Observable<number> = this.store.select(selectApodPage);
+  totalItems$: Observable<number> = this.store.select(selectApodTotalItems);
+  paginationEnabled$: Observable<boolean> = this.store.select(
+    selectApodPaginationEnabled
+  );
 
   constructor(
-    private apiCaller: DataService,
-    private errorService: ErrorService,
-    private router: Router,
+    private store: Store<ApodState>,
     private sanitizer: DomSanitizer,
-    private searchService: SearchService,
-    private cacheService: CachingService
-  ) {
-    this.date = new Date();
-    this.searchService.searchTerm$.subscribe((term) => this.filterData(term));
+    private searchService: SearchService
+  ) {}
+
+  ngOnInit(): void {
+    this.store.dispatch(ApodActions.calculateTotalItems());
+
+    this.loadData();
+
+    this.searchService.searchTerm$
+      .pipe(
+        skip(1),
+        switchMap((searchText) =>
+          this.currentPage$.pipe(
+            take(1),
+            map((currentPage) => ({ searchText, currentPage }))
+          )
+        )
+      )
+      .subscribe(({ searchText, currentPage }) => {
+        if (searchText && searchText.length > minSymbolsToTriggerSearch) {
+          this.store.dispatch(
+            ApodActions.initiateSearch({
+              searchTerm: searchText,
+              cacheKey: searchText,
+              pageNumber: currentPage,
+            })
+          );
+        } else if (!searchText) {
+          this.store.dispatch(
+            ApodActions.loadPageFromCache({ pageNumber: currentPage })
+          );
+        }
+      });
   }
 
-  private filterData(term: string): void {
-    if (term && term.length > 2) {
-      const { property, value } = parseSearchTerm(term);
-      this.isSearchMode = value !== '';
-
-      if (this.isSearchMode && property != null) {
-        switch (property?.toLowerCase()) {
-          case 't':
-            let cache_t = this.cacheService.get(term);
-
-            if (cache_t && !this.isDataUpdated) {
-              this.data = cache_t;
-            } else {
-              this.data = this.cacheService
-                .get(this.CacheKeyword)
-                .filter((item: ApodModel) =>
-                  item.title.toLowerCase().includes(value.toLowerCase())
-                );
-              this.cacheService.set(term, this.data);
-              this.isDataUpdated = false;
-            }
-            break;
-          case 'e':
-            let cache_e = this.cacheService.get(term);
-
-            if (cache_e && !this.isDataUpdated) {
-              this.data = cache_e;
-            } else {
-              this.data = this.cacheService
-                .get(this.CacheKeyword)
-                .filter((item: ApodModel) =>
-                  item.explanation.toLowerCase().includes(value.toLowerCase())
-                );
-              this.cacheService.set(term, this.data);
-              this.isDataUpdated = false;
-            }
-            break;
-          case 'c':
-            let cache_c = this.cacheService.get(term);
-
-            if (cache_c && !this.isDataUpdated) {
-              this.data = cache_c;
-            } else {
-              this.data = this.cacheService
-                .get(this.CacheKeyword)
-                .filter((item: ApodModel) =>
-                  item.copyright.toLowerCase().includes(value.toLowerCase())
-                );
-              this.cacheService.set(term, this.data);
-              this.isDataUpdated = false;
-            }
-            break;
-          case 'd':
-            let cache_d = this.cacheService.get(term);
-
-            if (cache_d && !this.isDataUpdated) {
-              this.data = cache_d;
-            } else {
-              this.data = this.cacheService
-                .get(this.CacheKeyword)
-                .filter((item: ApodModel) => item.date.includes(value));
-              this.cacheService.set(term, this.data);
-              this.isDataUpdated = false;
-            }
-            break;
-          default:
-            this.data = this.cacheService.get(this.CacheKeyword);
-            break;
-        }
-      } else if (this.isSearchMode) {
-        let cache = this.cacheService.get(value);
-
-        if (cache) {
-          this.data = cache;
-        } else {
-          this.data = this.cacheService
-            .get(this.CacheKeyword)
-            .filter(
-              (item: ApodModel) =>
-                item.title.includes(value) || item.explanation.includes(value)
-            );
-          this.cacheService.set(value, this.data);
-        }
-      }
-    } else {
-      let cache = this.cacheService.get(this.CacheKeyword);
-
-      if (cache) {
-        this.data = cache;
-      } else {
-        if (!this.isDataUpdated) {
-          this.defaultCallApi();
-        }
-      }
-    }
-  }
-
-  async onScrollDown(): Promise<void> {
-    this.date.setDate(this.date.getDate() - 1);
-    let yearEnd = this.convertDateToString(this.date);
-    this.date.setMonth(this.date.getMonth() - 1);
-    let yearStart = this.convertDateToString(this.date);
-    await this.apiCall(yearStart, yearEnd);
-    this.filterData(this.searchService.getSearchTerm());
-  }
-
-  private async apiCall(yearStart: string, yearEnd: string): Promise<void> {
-    try {
-      const responseData$ = this.apiCaller.getApods(yearStart, yearEnd);
-      const responseData = await lastValueFrom(responseData$);
-
-      if (responseData.length == 0) {
-        return;
-      }
-
-      let cache = this.cacheService.get(this.CacheKeyword);
-
-      if (cache) {
-        cache = [...cache, ...responseData];
-        this.cacheService.set(this.CacheKeyword, cache);
-      } else {
-        this.cacheService.set(this.CacheKeyword, responseData);
-      }
-
-      let searchTerm = this.searchService.getSearchTerm();
-
-      if (searchTerm) {
-        this.filterData(searchTerm);
-      } else {
-        this.data = responseData;
-      }
-
-      this.isDataUpdated = true;
-
-    } catch (error) {
-      this.errorService.sendError(
-        'Error occurred during fetching the data. Please, try again shortly.'
+  private loadData(): void {
+    this.currentPage$.pipe(take(1)).subscribe((currentPage) => {
+      const today = new Date();
+      const { startDate, adjustedEndDate } = this.calculateDateRange(
+        today,
+        currentPage
       );
-      this.router.navigate(['/Error'], { state: { returnUrl: this.currentUrl } });
-    }
+
+      this.store.dispatch(
+        ApodActions.loadData({
+          startDate,
+          endDate: adjustedEndDate,
+          pageNumber: currentPage,
+        })
+      );
+    });
   }
 
-  private convertDateToString(givenDate: Date): string {
-    let year = givenDate.getFullYear().toString();
-    let month = String(givenDate.getMonth() + 1).padStart(2, '0');
-    let day = String(givenDate.getDate()).padStart(2, '0');
+  pageChanged(page: number): void {
+    const today = new Date();
+    const endDate = subtractDayFromDate(today); // Exclude the current day
+    const { startDate, adjustedEndDate } = this.calculateDateRange(
+      endDate,
+      page
+    );
 
-    let yearString = `${year}-${month}-${day}`;
+    this.store.dispatch(ApodActions.changeCurrentPage({ currentPage: page }));
 
-    return yearString;
+    this.currentPage$
+      .pipe(
+        take(1),
+        tap(() => {
+          this.store.dispatch(
+            ApodActions.loadData({
+              startDate,
+              endDate: adjustedEndDate,
+              pageNumber: page,
+            })
+          );
+        })
+      )
+      .subscribe();
   }
 
   isYouTubeLink(url: string): boolean {
@@ -194,14 +128,45 @@ export class APODComponent {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
-  private defaultCallApi(): void {
-    let date_default = new Date();
+  private calculateDateRange(
+    endDate: Date,
+    page: number
+  ): { startDate: Date; adjustedEndDate: Date } {
+    let adjustedEndDate = new Date(endDate);
 
-    let dateEnd = this.convertDateToString(date_default);
+    for (let i = 1; i < page; i++) {
+      adjustedEndDate = subtractMonthFromDate(adjustedEndDate);
+    }
 
-    date_default.setMonth(this.date.getMonth() - 1);
-    let dateStart = this.convertDateToString(date_default);
+    // First day of the month
+    const startDate = new Date(
+      adjustedEndDate.getFullYear(),
+      adjustedEndDate.getMonth(),
+      1
+    );
 
-    this.apiCall(dateStart, dateEnd);
+    // Check to not add the month to the current date
+    if (page !== 1) {
+      // Last day of the month
+      adjustedEndDate = new Date(
+        adjustedEndDate.getFullYear(),
+        adjustedEndDate.getMonth() + 1,
+        0
+      );
+    }
+
+    // Check so dates don't exceed the start date of APOD
+    if (startDate < firstDateForApod) {
+      return {
+        startDate: new Date(firstDateForApod),
+        adjustedEndDate: new Date(
+          firstDateForApod.getFullYear(),
+          firstDateForApod.getMonth() + 1,
+          0
+        ),
+      };
+    }
+
+    return { startDate, adjustedEndDate };
   }
 }

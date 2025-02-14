@@ -1,16 +1,15 @@
 .to-top {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--button-bg-color);
-    color: var(--button-color);
-    border: none;
-    border-radius: 50%;
-    padding: 12px 10px;
-    cursor: pointer;
-  }
-  
-  .to-top:hover {
-    background-color: var(--button-bg-color-hover);
-  }
-  
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--button-bg-color);
+  color: var(--button-color);
+  border: none;
+  border-radius: 50%;
+  padding: 12px 10px;
+  cursor: pointer;
+}
+
+.to-top:hover {
+  background-color: var(--button-bg-color-hover);
+}

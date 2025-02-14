@@ -1,4 +1,5 @@
 import { Component, Renderer2 } from '@angular/core';
+import { ROUTES } from '../app.routes';
 
 @Component({
   selector: 'app-header',
@@ -6,6 +7,7 @@ import { Component, Renderer2 } from '@angular/core';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
+  routes = ROUTES;
   public isLightTheme = false;
   public searchTerm: string = '';
   public isVisible = false;
@@ -19,10 +21,6 @@ export class HeaderComponent {
       'data-theme',
       this.isLightTheme ? 'light' : 'dark'
     );
-  }
-
-  public onSearchTermChange(searchTerm: string) {
-    this.searchTerm = searchTerm;
   }
 
   public toggleMenu() {

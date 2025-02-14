@@ -1,3 +1,20 @@
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+router-outlet {
+  flex-grow: 1;
+}
+
+app-footer {
+  margin-top: auto;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+}
+
 .back-to-top {
   display: block;
 }

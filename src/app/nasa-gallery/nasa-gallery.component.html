@@ -17,30 +17,28 @@
       <div>
         @if (item.links && item.data[0]) {
         <article class="tile">
-          <div class="tile-content">
-            <h2>{{ item.data[0].title }}</h2>
-            <img [src]="item.links[0].href" />
+          <h2>{{ item.data[0].title }}</h2>
+          <img [src]="item.links[0].href" />
 
-            @if (item.data[0].description) {
-            <div class="tile-summary">
-              <p>
-                {{ item.data[0].description }}
-              </p>
-            </div>
-            }
-            <div class="tile-summary">
-              @if (item.data[0].center) {
-              <p>Center: {{ item.data[0].center }}</p>
-              } @if (item.data[0].photographer) {
-              <p>Photographer: {{ item.data[0].photographer }}</p>
-              } @if (item.data[0].location) {
-              <p>Location: {{ item.data[0].location }}</p>
-              } @if (item.data[0].date_created) { }
-            </div>
+          @if (item.data[0].description) {
+          <div class="tile-summary">
             <p>
-              {{ item.data[0].date_created | dateFormat }}
+              {{ item.data[0].description }}
             </p>
           </div>
+          }
+          <div class="tile-summary">
+            @if (item.data[0].center) {
+            <p>Center: {{ item.data[0].center }}</p>
+            } @if (item.data[0].photographer) {
+            <p>Photographer: {{ item.data[0].photographer }}</p>
+            } @if (item.data[0].location) {
+            <p>Location: {{ item.data[0].location }}</p>
+            } @if (item.data[0].date_created) { }
+          </div>
+          <p>
+            {{ item.data[0].date_created | dateFormat }}
+          </p>
         </article>
 
         }

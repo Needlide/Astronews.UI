@@ -9,18 +9,19 @@ import { ErrorComponent } from './error/error.component';
 //import { MarsPhotosSpiritComponent } from './mars-photos-spirit/mars-photos-spirit.component';
 
 const routes: Routes = [
-  { path: 'News', component: NewsComponent },
-  { path: 'NasaGallery', component: NasaGalleryComponent },
-  { path: 'MarsPhotos/Curiosity', component: MarsPhotosCuriosityComponent },
-  //{ path: 'MarsPhotos/Opportunity', component: MarsPhotosOpportunityComponent },
-  //{ path: 'MarsPhotos/Spirit', component: MarsPhotosSpiritComponent },
-  { path: 'APOD', component: APODComponent },
-  { path: 'Error', component: ErrorComponent },
-  { path: '', redirectTo: '/News', pathMatch: 'full' }
+  { path: 'news', component: NewsComponent },
+  { path: 'gallery', component: NasaGalleryComponent },
+  { path: 'mars/curiosity', component: MarsPhotosCuriosityComponent },
+  //{ path: 'mars/opportunity', component: MarsPhotosOpportunityComponent },
+  //{ path: 'mars/spirit', component: MarsPhotosSpiritComponent },
+  { path: 'apod', component: APODComponent },
+  { path: 'error', component: ErrorComponent },
+  { path: '', redirectTo: 'news', pathMatch: 'full' },
+  { path: '**', redirectTo: 'news' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

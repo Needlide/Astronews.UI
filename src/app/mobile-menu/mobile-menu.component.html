@@ -1,10 +1,17 @@
 <div class="flex-container main-container">
   <div>
     <button class="close-button" (click)="closeMenu()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-        <path d="M19.293 4.293a1 1 0 0 1 1.414 1.414L5.414 20.707a1 1 0 0 1-1.414-1.414L19.293 4.293zM4.293 5.293a1 1 0 0 1 1.414-1.414L20.707 18.293a1 1 0 0 1-1.414 1.414L4.293 5.293z"/>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M19.293 4.293a1 1 0 0 1 1.414 1.414L5.414 20.707a1 1 0 0 1-1.414-1.414L19.293 4.293zM4.293 5.293a1 1 0 0 1 1.414-1.414L20.707 18.293a1 1 0 0 1-1.414 1.414L4.293 5.293z"
+        />
       </svg>
-    </button>    
+    </button>
   </div>
   <a class="flex-container logo-link" routerLink="/News">
     <img
@@ -21,7 +28,8 @@
           class="nav-link"
           routerLinkActive="active-link"
           [routerLinkActiveOptions]="{ exact: true }"
-          routerLink="/News"
+          routerLink="/news"
+          (click)="closeMenu()"
           >News</a
         >
       </li>
@@ -29,9 +37,9 @@
         <a
           class="nav-link"
           routerLinkActive="active-link"
-          routerLink="/MarsPhotos/Curiosity"
-        >
-          Curiosity
+          routerLink="/mars/curiosity"
+          (click)="closeMenu()"
+          >Curiosity
         </a>
       </li>
       <li>
@@ -39,9 +47,9 @@
           class="nav-link"
           routerLinkActive="active-link"
           [routerLinkActiveOptions]="{ exact: true }"
-          routerLink="/NasaGallery"
-        >
-          Nasa
+          routerLink="/gallery"
+          (click)="closeMenu()"
+          >Nasa
         </a>
       </li>
       <li>
@@ -49,17 +57,20 @@
           class="nav-link"
           routerLinkActive="active-link"
           [routerLinkActiveOptions]="{ exact: true }"
-          routerLink="/APOD"
-        >
-          APOD
+          routerLink="/apod"
+          (click)="closeMenu()"
+          >APOD
         </a>
       </li>
     </ul>
   </nav>
   <div class="theme-switcher">
     <label class="switch"
-      ><input type="checkbox" [checked]="isLightTheme" (change)="toggleTheme()"
-    />
-  <span class="slider round"></span></label>
+      ><input
+        type="checkbox"
+        [checked]="isLightTheme"
+        (change)="toggleTheme()" />
+      <span class="slider round"></span
+    ></label>
   </div>
 </div>

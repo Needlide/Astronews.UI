@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "@angular/core"
+        versions: ["*"]
+      - dependency-name: "@angular/cli"
+        versions: ["*"]
+      - dependency-name: "@angular/compiler"
+        versions: ["*"]
+      - dependency-name: "@angular/common"
+        versions: ["*"]
+      - dependency-name: "@angular/forms"
+        versions: ["*"]
+      - dependency-name: "@angular/router"
+        versions: ["*"]
+      - dependency-name: "@angular/platform-browser"
+        versions: ["*"]
+      - dependency-name: "@angular/platform-browser-dynamic"
+        versions: ["*"]
+      - dependency-name: "typescript"
+        versions: [">=5.4.0 <5.6.0"]
+      - dependency-name: "zone.js"
+        versions: [">=0.15.0"]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+    versioning-strategy: "increase-if-necessary"
+

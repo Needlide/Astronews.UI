@@ -2,26 +2,56 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.2.
 
-## Development server
+## About
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+A simple web app that visualizes data from the NASA API and SpaceflightAPI.
 
-## Code scaffolding
+## Table of Contents
+- [Installation](#installation)
+- [Run locally](#run-locally)
+- [Usage](#usage)
+- [License](#license)
+- [List of used APIs](#list-of-used-apis)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Installation
 
-## Build
+Download [Node.JS](https://nodejs.org/en/download/package-manager)\
+Install [Angular CLI](https://angular.dev/tools/cli/setup-local): `npm install -g @angular/cli`\
+Clone the repo: `git clone https://github.com/Needlide/Astronews.UI.git`\
+Navigate to the project directory: `cd repo`\
+Install dependencies: `npm install`
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Run locally
 
-## Running unit tests
+Obtain the API key at [NASA Open APIs](https://api.nasa.gov/#signUp)\
+Create a new file `src/environments/environment.ts` and copy code from `environment.prod.ts` to newly created `environment.ts`\
+Put your API key from [NASA Open APIs](https://api.nasa.gov/#signUp) in the `secrets/api_key` section like this: `api_key: YOUR_API_KEY_GOES_HERE`\
+Save the file
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Usage
 
-## Running end-to-end tests
+For advanced usage of the search bar append the prefix before the search term\
+Prefix must be split from the search term by semicolon `:`\
+Example: `t: NASA` - will search for titles which contain keyword `NASA`
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+Here is the list of prefixes used on different pages (News, Curiosity, NASA, APOD):
 
-## Further help
+- **News**
+  - No prefix - search by title and summary
+  - `t` - search by title
+  - `ns` - search by news site
+  - `s` - search by summary
+  - `p` - search by published before and published after dates (dates in `yyyy-mm-dd` format split with comma `,`)
+  - `pb` - search by published before date (`yyyy-mm-dd` format)
+  - `pa` - search by published after date (`yyyy-mm-dd` format)
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## License
+
+This project is licensed under the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+## List of used APIs
+
+- [APOD](https://github.com/nasa/apod-api)
+- [Mars Rover Photos](https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY)
+- [NASA Image and Video Library](https://images.nasa.gov/docs/images.nasa.gov_api_docs.pdf)
+- [Spaceflight News API](https://www.spaceflightnewsapi.net/)

@@ -1,21 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { ErrorService } from '../error.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-error',
   templateUrl: './error.component.html',
-  styleUrls: ['./error.component.scss']
+  styleUrls: ['./error.component.scss'],
 })
 export class ErrorComponent implements OnInit {
   errorMessage: string | undefined;
   returnUrl: string = '/';
-  constructor(private errorService: ErrorService,
-              private router: Router
-  ) { }
+  constructor(private errorService: ErrorService, private router: Router) {}
 
   ngOnInit(): void {
-    this.errorService.errorMessage$.subscribe(message => { this.errorMessage = message });
-    this.returnUrl = history.state?.returnUrl || this.getAndClearLocalStorageUrl() || '/';
+    this.errorService.errorMessage$.subscribe((message) => {
+      this.errorMessage = message;
+    });
+    this.returnUrl =
+      history.state?.returnUrl || this.getAndClearLocalStorageUrl() || '/';
   }
 
   private getAndClearLocalStorageUrl(): string | null {
@@ -29,7 +30,7 @@ export class ErrorComponent implements OnInit {
     }
   }
 
-  goBack(){
+  goBack() {
     this.router.navigateByUrl(this.returnUrl);
   }
 }

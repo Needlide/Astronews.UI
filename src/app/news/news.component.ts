@@ -1,294 +1,201 @@
-import { Component } from '@angular/core';
-import { NewsModel } from '../models/news.model';
-import { DataService } from '../data.service';
-import { ErrorService } from '../error.service';
-import { Router } from '@angular/router';
-import { PromptService } from '../prompt.service';
-import { SearchService } from '../search.service';
-import { parseSearchTerm, parseSearchValue } from '../search.util';
-import { UrlBuilderService } from '../url-builder.service';
-import { CachingService } from '../caching.service';
-import { lastValueFrom } from 'rxjs';
-import { NewsCache } from '../models/news-cache-model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NewsModel } from '../models/news/news.model';
+import { Store } from '@ngrx/store';
+import { Observable, skip, Subscription, take } from 'rxjs';
+import { NewsActions } from './news.actions';
+import { NewsState } from './news.reducer';
+import {
+  selectNewsData,
+  selectNewsLoading,
+  selectNewsError,
+  selectNewsPage,
+  selectNewsTotalItems,
+  selectNewsItemsPerPage,
+  selectNewsTotalSearchItems,
+  selectNewsIsSearchState,
+  selectNewsSearchQuery,
+  selectNewsSearchPage,
+  selectNewsSearchItemsPerPage,
+} from './news.selectors';
+import { SearchService } from '../search/search.service';
+import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
   selector: 'app-news',
   templateUrl: './news.component.html',
   styleUrls: ['./news.component.scss'],
 })
-export class NewsComponent {
-  data: NewsModel[] = [];
-  private cacheKeyword: string = '';
-  isSearchMode: boolean = false;
-  isDataAvailable: boolean = false;
-  private readonly currentUrl: string = '/News';
+export class NewsComponent implements OnInit, OnDestroy {
+  data$: Observable<NewsModel[]> = this.store.select(selectNewsData);
+  isLoading$: Observable<boolean> = this.store.select(selectNewsLoading);
+  error$: Observable<string | null> = this.store.select(selectNewsError);
+  currentPage$: Observable<number> = this.store.select(selectNewsPage);
+  currentSearchPage$: Observable<number> =
+    this.store.select(selectNewsSearchPage);
+  totalItems$: Observable<number> = this.store.select(selectNewsTotalItems);
+  totalSearchItems$: Observable<number> = this.store.select(
+    selectNewsTotalSearchItems
+  );
+  itemsPerPage$: Observable<number> = this.store.select(selectNewsItemsPerPage);
+  searchItemsPerPage$: Observable<number> = this.store.select(
+    selectNewsSearchItemsPerPage
+  );
+  isSearchState$: Observable<boolean> = this.store.select(
+    selectNewsIsSearchState
+  );
+  searchTerm$: Observable<string> = this.store.select(selectNewsSearchQuery);
 
-  private iconStates: string[] = [];
-  private savedStates: boolean[] = [];
+  private _subscriptions: Subscription[] = [];
 
-  private emptyStar = 'assets/icons/save-icons.svg#star-empty';
-  private savedStar = 'assets/icons/save-icons.svg#star-saved';
+  isSearchState: boolean = false;
+  error: string | null = null;
+  isLoading: boolean = false;
+  currentSearchPage: number = 1;
+  currentPage: number = 1;
+  totalSearchItems: number = 0;
+  totalItems: number = 0;
+  searchItemsPerPage: number = 0;
+  itemsPerPage: number = 0;
 
   constructor(
-    private apiCaller: DataService,
-    private errorService: ErrorService,
-    private router: Router,
-    private promptService: PromptService,
-    private searchService: SearchService,
-    urlBuilder: UrlBuilderService,
-    private cacheService: CachingService
-  ) {
-    this.searchService.searchTerm$.subscribe((term) => {
-      if (term && term.length > 2) {
-        const { property, value } = parseSearchTerm(term);
-        this.isSearchMode = value !== '';
+    private store: Store<NewsState>,
+    private searchService: SearchService
+  ) {}
 
-        if (this.isSearchMode && property != null) {
-          this.cacheKeyword = term;
+  ngOnInit(): void {
+    this.setupSubscriptions();
+    this.loadData();
+    this.trackSearchTerm();
+  }
 
-          switch (property?.toLowerCase()) {
-            case 't':
-              let cache_t = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_t) {
-                this.data = cache_t.data;
-                this.promptService.NewsNext = cache_t.nextUrl;
-              } else {
-                let urlT = urlBuilder.getNewsUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  parseSearchValue(value)
-                );
-
-                this.clearApiCall(urlT, this.cacheKeyword);
-              }
-              break;
-            case 'ns':
-              let cache_ns = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_ns) {
-                this.data = cache_ns.data;
-                this.promptService.NewsNext = cache_ns.nextUrl;
-              } else {
-                let urlNS = urlBuilder.getNewsUrl(
-                  undefined,
-                  parseSearchValue(value)
-                );
-
-                this.clearApiCall(urlNS, this.cacheKeyword);
-              }
-              break;
-            case 's':
-              let cache_s = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_s) {
-                this.data = cache_s.data;
-                this.promptService.NewsNext = cache_s.nextUrl;
-              } else {
-                let urlS = urlBuilder.getNewsUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  parseSearchValue(value)
-                );
-
-                this.clearApiCall(urlS, this.cacheKeyword);
-              }
-              break;
-            case 'p':
-              let cache_p = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_p) {
-                this.data = cache_p.data;
-                this.promptService.NewsNext = cache_p.nextUrl;
-              } else {
-                let dates = parseSearchValue(value);
-                if (dates.length == 2) {
-                  let urlP = urlBuilder.getNewsUrl(
-                    undefined,
-                    undefined,
-                    dates[0],
-                    dates[1]
-                  );
-
-                  this.clearApiCall(urlP, this.cacheKeyword);
-                }
-              }
-              break;
-            case 'pb':
-              let cache_pb = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_pb) {
-                this.data = cache_pb.data;
-                this.promptService.NewsNext = cache_pb.nextUrl;
-              } else {
-                let urlPB = urlBuilder.getNewsUrl(
-                  undefined,
-                  undefined,
-                  undefined,
-                  value
-                );
-
-                this.clearApiCall(urlPB, this.cacheKeyword);
-              }
-              break;
-            case 'pa':
-              let cache_pa = this.cacheService.get(this.cacheKeyword);
-
-              if (cache_pa) {
-                this.data = cache_pa.data;
-                this.promptService.NewsNext = cache_pa.nextUrl;
-              } else {
-                let urlPA = urlBuilder.getNewsUrl(undefined, undefined, value);
-
-                this.clearApiCall(urlPA, this.cacheKeyword);
-              }
-              break;
-            default:
-              let default_url = urlBuilder.getNewsUrl();
-              let cache = cacheService.get(default_url);
-
-              if (cache) {
-                this.data = cache.data;
-                this.promptService.NewsNext = cache.nextUrl;
-              } else {
-                this.clearApiCall(default_url, default_url);
-              }
-              break;
-          }
-        } else if (this.isSearchMode) {
-          this.cacheKeyword = value;
-          let cache = cacheService.get(value);
-
-          if (cache) {
-            this.data = cache.data;
-            this.promptService.NewsNext = cache.nextUrl;
-          } else {
-            let url = urlBuilder.getNewsUrl(
-              undefined,
-              undefined,
-              undefined,
-              undefined,
-              value
-            );
-            this.clearApiCall(url, value);
-          }
-        }
-      } else {
-        let urlEmpty = urlBuilder.getNewsUrl();
-        this.cacheKeyword = urlEmpty;
-        let cache = cacheService.get(this.cacheKeyword);
-
-        if (cache) {
-          this.data = cache.data;
-          this.promptService.NewsNext = cache.nextUrl;
-        } else {
-          this.clearApiCall(urlEmpty, this.cacheKeyword);
-        }
-      }
+  private setupSubscriptions(): void {
+    const searchStateSub = this.isSearchState$.subscribe((searchState) => {
+      this.isSearchState = searchState;
     });
 
-    this.initializeState();
-  }
+    const loadingSub = this.isLoading$.subscribe((isLoading) => {
+      this.isLoading = isLoading;
+    });
 
-  async onScrollDown() {
-    if (!this.isSearchMode) {
-      await this.apiCall(this.promptService.NewsNext, this.cacheKeyword);
-    }
-  }
+    const errorSub = this.error$.subscribe((error) => {
+      this.error = error;
+    });
 
-  private async apiCall(url: string, key: string): Promise<void> {
-    if (!url) {
-      this.isDataAvailable = false;
-      return;
-    }
-    try {
-      const responseData = await lastValueFrom(this.apiCaller.getNews(url));
-
-      if (responseData.results.length == 0) {
-        return;
-      }
-
-      if (responseData.next != url) {
-        this.data = [...this.data, ...responseData.results];
-        this.promptService.NewsNext = responseData.next;
-        let newsCache: NewsCache;
-        newsCache = { nextUrl: responseData.next, data: this.data };
-        this.cacheService.set(key, newsCache);
-        responseData.next
-          ? (this.isDataAvailable = true)
-          : (this.isDataAvailable = false);
-      }
-    } catch (error) {
-      this.errorService.sendError(
-        'Error occured during data fetch. Please, try again shortly.'
-      );
-      this.router.navigate(['/Error'], {
-        state: { returnUrl: this.currentUrl },
-      });
-    }
-  }
-
-  private clearApiCall(url: string, key: string): void {
-    this.apiCaller.getNews(url).subscribe({
-      next: (v) => {
-        this.data = v.results;
-        this.promptService.NewsNext = v.next;
-        let newsCache: NewsCache;
-        newsCache = { nextUrl: v.next, data: v.results };
-        this.cacheService.set(key, newsCache);
-        v.next ? (this.isDataAvailable = true) : (this.isDataAvailable = false);
-      },
-      error: (e) => {
-        this.errorService.sendError(
-          'Error occured during data fetch. Please, try again shortly.'
+    const searchSub = this.searchService.searchTerm$.subscribe((searchText) => {
+      if (searchText && searchText.length > minSymbolsToTriggerSearch) {
+        this.store.dispatch(
+          NewsActions.setSearchQuery({ searchTerm: searchText })
         );
-        this.router.navigate(['/Error'], {
-          state: { returnUrl: this.currentUrl },
-        });
-      },
+      } else if (searchText === '') {
+        this.store.dispatch(NewsActions.setSearchQuery({ searchTerm: '' }));
+      }
+    });
+
+    const searchPageSub = this.currentSearchPage$.subscribe((currentPage) => {
+      this.currentSearchPage = currentPage;
+    });
+
+    const currentPageSub = this.currentPage$.subscribe((currentPage) => {
+      this.currentPage = currentPage;
+    });
+
+    const totalSearchItemsSub = this.totalSearchItems$.subscribe(
+      (totalItems) => {
+        this.totalSearchItems = totalItems;
+      }
+    );
+
+    const totalItemsSub = this.totalItems$.subscribe((totalItems) => {
+      this.totalItems = totalItems;
+    });
+
+    const searchItemsPerPageSub = this.searchItemsPerPage$.subscribe(
+      (itemsPerPage) => {
+        this.searchItemsPerPage = itemsPerPage;
+      }
+    );
+
+    const itemsPerPageSub = this.itemsPerPage$.subscribe((itemsPerPage) => {
+      this.itemsPerPage = itemsPerPage;
+    });
+
+    this._subscriptions.push(
+      searchStateSub,
+      loadingSub,
+      errorSub,
+      searchSub,
+      searchPageSub,
+      currentPageSub,
+      totalSearchItemsSub,
+      totalItemsSub,
+      searchItemsPerPageSub,
+      itemsPerPageSub
+    );
+  }
+
+  private loadData(): void {
+    this.store.dispatch(NewsActions.loadData());
+  }
+
+  private trackSearchTerm(): void {
+    const searchTermSub = this.searchTerm$
+      .pipe(skip(1))
+      .subscribe((searchText) => {
+        if (searchText) {
+          this.store.dispatch(NewsActions.initiateSearch());
+        } else if (searchText === '') {
+          this.store.dispatch(NewsActions.loadData());
+        }
+      });
+
+    this._subscriptions.push(searchTermSub);
+  }
+
+  onPageChanged(page: number): void {
+    if (this.isSearchState) {
+      this.searchPageChanged(page);
+    } else {
+      this.pageChanged(page);
+    }
+  }
+
+  private pageChanged(page: number): void {
+    this.store.dispatch(NewsActions.setPage({ currentPage: page }));
+  }
+
+  private searchPageChanged(page: number): void {
+    this.store.dispatch(NewsActions.setSearchPage({ searchPage: page }));
+  }
+
+  onItemsPerPageChanged(itemsPerPage: number): void {
+    if (this.isSearchState) {
+      this.searchItemsPerPageChanged(itemsPerPage);
+    } else {
+      this.itemsPerPageChanged(itemsPerPage);
+    }
+  }
+
+  private itemsPerPageChanged(itemsPerPage: number): void {
+    this.itemsPerPage$.pipe(take(1)).subscribe((itemsPerPageOld) => {
+      if (itemsPerPage !== itemsPerPageOld) {
+        this.store.dispatch(NewsActions.setItemsPerPage({ itemsPerPage }));
+      }
     });
   }
 
-  async nextPage() {
-    await this.apiCall(this.promptService.NewsNext, this.cacheKeyword);
+  private searchItemsPerPageChanged(itemsPerPage: number): void {
+    this.searchItemsPerPage$.pipe(take(1)).subscribe((itemsPerPageOld) => {
+      if (itemsPerPage !== itemsPerPageOld) {
+        this.store.dispatch(
+          NewsActions.setSearchItemsPerPage({
+            searchItemsPerPage: itemsPerPage,
+          })
+        );
+      }
+    });
   }
 
-  private initializeState() {
-    this.savedStates = this.data.map(() => false);
-  }
-
-  onMouseEnter(index: number) {
-    this.iconStates[index] = this.savedStar;
-  }
-
-  onMouseLeave(index: number) {
-    if (!this.savedStates[index]) {
-      this.iconStates[index] = this.emptyStar;
-    }
-  }
-
-  onMouseClick(index: number) {
-    console.log('mouse clicked');
-    this.savedStates[index] = !this.savedStates[index];
-    this.iconStates[index] = this.savedStates[index]
-      ? this.savedStar
-      : this.emptyStar;
-    console.log(this.savedStates[index]);
-    console.log(this.iconStates[index]);
-  }
-
-  getIcon(index: number): string {
-    if (this.iconStates[index]) {
-      return this.iconStates[index];
-    } else {
-      return this.emptyStar;
-    }
+  ngOnDestroy(): void {
+    this._subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

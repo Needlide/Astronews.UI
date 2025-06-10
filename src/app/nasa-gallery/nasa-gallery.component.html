@@ -1,33 +1,59 @@
-<div *ngIf="data.length == 0" class="info-text">Nothing to show</div>
-
-<section
-  class="container content"
-  *ngIf="data.length > 0"
-  infiniteScroll
-  [infiniteScrollDistance]="2"
-  [infiniteScrollThrottle]="100"
-  (scrolled)="onScrollDown()"
->
-  <article class="tile" *ngFor="let item of data">
-    <div class="tile-content" *ngIf="item.links && item.data[0]">
-      <h2>{{ item.data[0].title }}</h2>
-      <img [src]="item.links[0].href" />
-
+<div>
+  @if (error) {
+  <div class="error-message">
+    <p>Error: {{ error }}</p>
+  </div>
+  } @if (!(error) && !(data$ | async)?.length && !(isLoading)) {
+  <div>
+    <p class="error-message">No data available.</p>
+  </div>
+  } @if ((isLoading) && !(error)) {
+  <app-loading-spinner />
+  } @if (!(error) && (data$ | async); as data) {
+  <div>
+    @if (data.length > 0) {
+    <section class="container content">
+      @for (item of data; track $index) {
       <div>
-        <p class="tile-summary" *ngIf="item.data[0].description">
-          {{ item.data[0].description }}
-        </p>
-        <p class="tile-summary" *ngIf="item.data[0].center">
-          {{ item.data[0].center }}
-        </p>
-        <p *ngIf="item.data[0].date_created">
-          {{ item.data[0].date_created | dateFormat }}
-        </p>
-      </div>
-    </div>
-  </article>
-</section>
+        @if (item.links && item.data[0]) {
+        <article class="tile">
+          <h2>{{ item.data[0].title }}</h2>
+          <img [src]="item.links[0].href" />
 
-<div *ngIf="isSearchMode" class="pagination-controls">
-  <button [disabled]="!isDataAvailable" (click)="nextPage()">Next</button>
+          @if (item.data[0].description) {
+          <div class="tile-summary">
+            <p>
+              {{ item.data[0].description }}
+            </p>
+          </div>
+          }
+          <div class="tile-summary">
+            @if (item.data[0].center) {
+            <p>Center: {{ item.data[0].center }}</p>
+            } @if (item.data[0].photographer) {
+            <p>Photographer: {{ item.data[0].photographer }}</p>
+            } @if (item.data[0].location) {
+            <p>Location: {{ item.data[0].location }}</p>
+            } @if (item.data[0].date_created) { }
+          </div>
+          <p>
+            {{ item.data[0].date_created | dateFormat }}
+          </p>
+        </article>
+
+        }
+      </div>
+      }
+      <app-pagination
+        [currentPage]="currentPage"
+        [displayItemsPerPage]="true"
+        [totalItems]="totalItems"
+        [selectedItemsPerPage]="itemsPerPage"
+        (pageChanged)="onPageChanged($event)"
+        (itemsPerPageChanged)="onItemsPerPageChanged($event)"
+      />
+    </section>
+    }
+  </div>
+  }
 </div>

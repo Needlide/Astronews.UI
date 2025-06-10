@@ -2,14 +2,16 @@
   <div>
     <div>
       <nav class="flex-container">
-        <h5>Quick links</h5>
         <ul class="flex-container nav-footer-list">
+          <li>
+            <h5>Quick links</h5>
+          </li>
           <li>
             <a
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/News"
+              [routerLink]="routes.news"
               >News</a
             >
           </li>
@@ -18,7 +20,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/MarsPhotos/Curiosity"
+              [routerLink]="routes.marsCuriosity"
               >Curiosity</a
             >
           </li>
@@ -27,7 +29,7 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/NasaGallery"
+              [routerLink]="routes.nasaGallery"
               >NASA</a
             >
           </li>
@@ -36,37 +38,40 @@
               class="nav-link"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: true }"
-              routerLink="/APOD"
+              [routerLink]="routes.apod"
               >APOD</a
             >
           </li>
         </ul>
       </nav>
       <div class="flex-container footer-feedback">
-        <h5>Feedback</h5>
         <ul class="flex-container footer-list">
+          <li>
+            <h5>Feedback</h5>
+          </li>
           <li>
             <a
               class="nav-link"
               href="https://github.com/Needlide/Astronews.UI"
               target="_blank"
               rel="noopener noreferrer"
-              >GitHub</a>
+              >GitHub</a
+            >
           </li>
           <li>
-            <a class="nav-link" href="mailto:example@gmail.com"
-              >example@gmail.com</a
+            <a class="nav-link" href="mailto:astronews.contact.me@gmail.com"
+              >astronews.contact.me&commat;gmail.com</a
             >
           </li>
         </ul>
       </div>
     </div>
-    <div>
+    <div class="copyright">
       <div>
-        <p>&copy; 2023 Astronews. All rights reserved.</p>
+        <p>&copy; 2025 Astronews. All rights reserved.</p>
       </div>
       <div>
-        <p>Website by Needlide</p>
+        <p>Website by <a href="https://github.com/Needlide">Needlide</a></p>
       </div>
     </div>
   </div>

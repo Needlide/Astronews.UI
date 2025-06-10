@@ -7,7 +7,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class MobileMenuComponent {
   @Input() isLightTheme = false;
-  @Output() isLightThemeChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() isLightThemeChange: EventEmitter<boolean> =
+    new EventEmitter<boolean>();
   @Input() isVisible = false;
   @Output() isVisibleChange: EventEmitter<void> = new EventEmitter<void>();
 
@@ -24,6 +25,5 @@ export class MobileMenuComponent {
   public closeMenu() {
     this.isVisible = !this.isVisible;
     this.isVisibleChange.emit();
-    console.log(this.isVisible);
   }
 }

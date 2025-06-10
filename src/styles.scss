@@ -1,4 +1,3 @@
-/* You can add global styles to this file, and also import other style files */
 @import "node_modules/modern-normalize/modern-normalize.css";
 @import "themes";
 
@@ -20,6 +19,7 @@ body {
   font-weight: 400;
   font-style: normal;
   font-family: "Source Sans 3", sans-serif;
+  overflow-x: hidden;
   background: var(--main-bg-color);
 }
 
@@ -36,7 +36,13 @@ img {
   display: block;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
   padding: 0;
 }
@@ -85,8 +91,8 @@ p, h1, h2, h3, h4, h5, h6 {
   }
 }
 
-.info-text {
-  font-size: 4.8vw;
+.error-message {
+  font-size: 4.6vw;
   color: aliceblue;
   padding-top: 18%;
   padding-bottom: 18%;

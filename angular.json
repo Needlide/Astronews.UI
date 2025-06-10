@@ -15,7 +15,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@ngx-env/builder:browser",
           "options": {
             "outputPath": "dist/astronews.ui",
             "index": "src/index.html",
@@ -54,13 +54,11 @@
                   "maximumError": "4kb"
                 }
               ],
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "buildOptimizer": true,
               "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
             },
             "development": {
               "buildOptimizer": false,
@@ -74,15 +72,17 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@ngx-env/builder:dev-server",
+          //"builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "Astronews.UI:build:production"
+              "buildTarget": "Astronews.UI:build:production"
             },
             "development": {
-              "browserTarget": "Astronews.UI:build:development"
+              "buildTarget": "Astronews.UI:build:development"
             }
           },
+          "outputPath": "temp",
           "defaultConfiguration": "development"
         },
         "extract-i18n": {

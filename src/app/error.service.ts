@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ErrorService {
   private errorSubject = new ReplaySubject<string>(1);
   errorMessage$ = this.errorSubject.asObservable();
 
-  constructor() { }
+  constructor() {}
 
-  sendError(message: string){
+  sendError(message: string) {
     this.errorSubject.next(message);
   }
 }

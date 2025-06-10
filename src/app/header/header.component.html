@@ -15,7 +15,7 @@
             class="nav-link"
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }"
-            routerLink="/News"
+            [routerLink]="routes.news"
             >News</a
           >
         </li>
@@ -24,22 +24,22 @@
           <a
             class="nav-link"
             routerLinkActive="active-link"
-            routerLink="/MarsPhotos/Curiosity"
+            [routerLink]="routes.marsCuriosity"
             >Curiosity</a
           >
           <!-- <ul class="dropdown-menu">
             <li>
-              <a class="nav-link" routerLink="/MarsPhotos/Curiosity"
+              <a class="nav-link" routerLink="/mars/curiosity"
                 >Curiosity</a
               >
             </li>
             <li>
-              <a class="nav-link" routerLink="/MarsPhotos/Opportunity"
+              <a class="nav-link" routerLink="/mars/opportunity"
                 >Opportunity</a
               >
             </li>
             <li>
-              <a class="nav-link" routerLink="/MarsPhotos/Spirit">Spirit</a>
+              <a class="nav-link" routerLink="/mars/spirit">Spirit</a>
             </li>
           </ul> -->
         </li>
@@ -48,7 +48,7 @@
             class="nav-link"
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }"
-            routerLink="/NasaGallery"
+            [routerLink]="routes.nasaGallery"
             >NASA</a
           >
         </li>
@@ -57,23 +57,14 @@
             class="nav-link"
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }"
-            routerLink="/APOD"
+            [routerLink]="routes.apod"
             >APOD</a
           >
         </li>
       </ul>
     </nav>
 
-    <div class="search-bar">
-      <input
-        type="text"
-        name="searchTerm"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="searchSubject.next(searchTerm)"
-        placeholder="Search..."
-      />
-      <button (click)="clearSearch()" type="button">X</button>
-    </div>
+    <app-search-bar></app-search-bar>
 
     <div class="theme-switcher">
       <label class="switch">
@@ -92,6 +83,13 @@
       </a>
     </div>
 
-    <app-mobile-menu *ngIf="isVisible" [isLightTheme]="isLightTheme" [isVisible]="isVisible" (isVisibleChange)="onMenuVisibilityChange()" (isLightThemeChange)="onLightThemeChange($event)" class="mobile-menu"></app-mobile-menu>
+    <app-mobile-menu
+      *ngIf="isVisible"
+      [isLightTheme]="isLightTheme"
+      [isVisible]="isVisible"
+      (isVisibleChange)="onMenuVisibilityChange()"
+      (isLightThemeChange)="onLightThemeChange($event)"
+      class="mobile-menu"
+    ></app-mobile-menu>
   </div>
 </header>

@@ -24,9 +24,10 @@ import {
 } from '../shared/constants';
 
 @Component({
-  selector: 'app-apod',
-  templateUrl: './apod.component.html',
-  styleUrls: ['./apod.component.scss'],
+    selector: 'app-apod',
+    templateUrl: './apod.component.html',
+    styleUrls: ['./apod.component.scss'],
+    standalone: false
 })
 export class APODComponent implements OnInit {
   data$: Observable<ApodModel[]> = this.store.select(selectApodData);

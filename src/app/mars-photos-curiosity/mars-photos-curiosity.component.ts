@@ -18,9 +18,10 @@ import { MarsCuriosityActions } from './mars-photos-curiosity.actions';
 import { SearchService } from '../search/search.service';
 
 @Component({
-  selector: 'app-mars-photos',
-  templateUrl: './mars-photos-curiosity.component.html',
-  styleUrls: ['./mars-photos-curiosity.component.scss'],
+    selector: 'app-mars-photos',
+    templateUrl: './mars-photos-curiosity.component.html',
+    styleUrls: ['./mars-photos-curiosity.component.scss'],
+    standalone: false
 })
 export class MarsPhotosCuriosityComponent implements OnInit, OnDestroy {
   data$: Observable<MarsModel[]> = this.store.select(selectMarsCuriosityData);

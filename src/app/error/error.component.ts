@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ErrorService } from '../error.service';
 import { Router } from '@angular/router';
 @Component({
-  selector: 'app-error',
-  templateUrl: './error.component.html',
-  styleUrls: ['./error.component.scss'],
+    selector: 'app-error',
+    templateUrl: './error.component.html',
+    styleUrls: ['./error.component.scss'],
+    standalone: false
 })
 export class ErrorComponent implements OnInit {
   errorMessage: string | undefined;

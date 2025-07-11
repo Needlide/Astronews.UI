@@ -21,9 +21,10 @@ import { SearchService } from '../search/search.service';
 import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
-  selector: 'app-nasa-gallery',
-  templateUrl: './nasa-gallery.component.html',
-  styleUrls: ['./nasa-gallery.component.scss'],
+    selector: 'app-nasa-gallery',
+    templateUrl: './nasa-gallery.component.html',
+    styleUrls: ['./nasa-gallery.component.scss'],
+    standalone: false
 })
 export class NasaGalleryComponent implements OnInit, OnDestroy {
   data$: Observable<Data[]> = this.store.select(selectNasaGalleryData);

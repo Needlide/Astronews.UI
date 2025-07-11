@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'dataSort',
+    name: 'dataSort',
+    standalone: false
 })
 export class DataSortPipe implements PipeTransform {
   transform(array: any[], field: string): any[] {

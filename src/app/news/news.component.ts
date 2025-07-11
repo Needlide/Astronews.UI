@@ -21,9 +21,10 @@ import { SearchService } from '../search/search.service';
 import { minSymbolsToTriggerSearch } from '../shared/constants';
 
 @Component({
-  selector: 'app-news',
-  templateUrl: './news.component.html',
-  styleUrls: ['./news.component.scss'],
+    selector: 'app-news',
+    templateUrl: './news.component.html',
+    styleUrls: ['./news.component.scss'],
+    standalone: false
 })
 export class NewsComponent implements OnInit, OnDestroy {
   data$: Observable<NewsModel[]> = this.store.select(selectNewsData);

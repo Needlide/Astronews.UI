@@ -2,9 +2,10 @@ import { Component, Renderer2 } from '@angular/core';
 import { ROUTES } from '../app.routes';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss'],
+    standalone: false
 })
 export class HeaderComponent {
   routes = ROUTES;

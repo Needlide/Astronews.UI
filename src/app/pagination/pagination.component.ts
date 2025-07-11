@@ -2,11 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-pagination',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './pagination.component.html',
-  styleUrl: './pagination.component.scss',
+    selector: 'app-pagination',
+    imports: [FormsModule],
+    templateUrl: './pagination.component.html',
+    styleUrl: './pagination.component.scss'
 })
 export class PaginationComponent {
   @Input() displayItemsPerPage: boolean = true;

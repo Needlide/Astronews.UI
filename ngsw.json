@@ -1,7 +1,7 @@
 {
   "configVersion": 1,
-  "timestamp": 1760022090995,
-  "index": "https://needlide.github.io/Astronews.UI/index.html",
+  "timestamp": 1760024349161,
+  "index": "/index.html",
   "assetGroups": [
     {
       "name": "app",
@@ -11,13 +11,13 @@
         "ignoreVary": true
       },
       "urls": [
-        "https://needlide.github.io/Astronews.UI/favicon.ico",
-        "https://needlide.github.io/Astronews.UI/index.html",
-        "https://needlide.github.io/Astronews.UI/main.03f0d7e3e64652b5.js",
-        "https://needlide.github.io/Astronews.UI/manifest.webmanifest",
-        "https://needlide.github.io/Astronews.UI/polyfills.16a0eb34d75d0211.js",
-        "https://needlide.github.io/Astronews.UI/runtime.ef23428cdb8f5f03.js",
-        "https://needlide.github.io/Astronews.UI/styles.d4ac9c5aea51c051.css"
+        "/favicon.ico",
+        "/index.html",
+        "/main.03f0d7e3e64652b5.js",
+        "/manifest.webmanifest",
+        "/polyfills.16a0eb34d75d0211.js",
+        "/runtime.ef23428cdb8f5f03.js",
+        "/styles.d4ac9c5aea51c051.css"
       ],
       "patterns": []
     },
@@ -29,21 +29,21 @@
         "ignoreVary": true
       },
       "urls": [
-        "https://needlide.github.io/Astronews.UI/assets/_redirects",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-128x128.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-144x144.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-152x152.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-192x192.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-384x384.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-512x512.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-72x72.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/icon-96x96.png",
-        "https://needlide.github.io/Astronews.UI/assets/icons/save-icons.svg",
-        "https://needlide.github.io/Astronews.UI/assets/images/AstronewsLogo.png",
-        "https://needlide.github.io/Astronews.UI/fontawesome-webfont.8a7cb27d142e3e19.ttf",
-        "https://needlide.github.io/Astronews.UI/fontawesome-webfont.cf011583fb81df9f.woff",
-        "https://needlide.github.io/Astronews.UI/fontawesome-webfont.da909aa098b0ee2d.svg",
-        "https://needlide.github.io/Astronews.UI/fontawesome-webfont.e9955780856cf8aa.woff2"
+        "/assets/_redirects",
+        "/assets/icons/icon-128x128.png",
+        "/assets/icons/icon-144x144.png",
+        "/assets/icons/icon-152x152.png",
+        "/assets/icons/icon-192x192.png",
+        "/assets/icons/icon-384x384.png",
+        "/assets/icons/icon-512x512.png",
+        "/assets/icons/icon-72x72.png",
+        "/assets/icons/icon-96x96.png",
+        "/assets/icons/save-icons.svg",
+        "/assets/images/AstronewsLogo.png",
+        "/fontawesome-webfont.8a7cb27d142e3e19.ttf",
+        "/fontawesome-webfont.cf011583fb81df9f.woff",
+        "/fontawesome-webfont.da909aa098b0ee2d.svg",
+        "/fontawesome-webfont.e9955780856cf8aa.woff2"
       ],
       "patterns": []
     }
@@ -70,28 +70,28 @@
     }
   ],
   "hashTable": {
-    "https://needlide.github.io/Astronews.UI/assets/_redirects": "f012e82ac67b94d51c0147d1dfcb2a1e1d131c34",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-128x128.png": "b1f06c7d714abb4a0cc4d1f7c954feb26826e4c4",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-144x144.png": "96a0d629765c1bc85d9263c6bc83094ca776d267",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-152x152.png": "b1fbbee3902eb96a7658e3bb006f31f78ca5a44c",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-192x192.png": "e4211163bf0911688fbfb80278d8ff4d2f77691d",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-384x384.png": "329749cd6393768d3131ed6304c136b1ca05f2fd",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-512x512.png": "559d9c4318b45a1f2b10596bbb4c960fe521dbcc",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-72x72.png": "279825a1ac4377032ae996a1832c641e33ccf1b6",
-    "https://needlide.github.io/Astronews.UI/assets/icons/icon-96x96.png": "592885efcbfee27e5e20be4fa3043589390d2740",
-    "https://needlide.github.io/Astronews.UI/assets/icons/save-icons.svg": "f7d185e7843ee2c30866bb0b1f807a20cfaa361b",
-    "https://needlide.github.io/Astronews.UI/assets/images/AstronewsLogo.png": "53d0e848050cf3f09b1c74fc1744b8ad51ce0aa0",
-    "https://needlide.github.io/Astronews.UI/favicon.ico": "e1a040d3fc713e46a3192fee75e1549505a6ebf9",
-    "https://needlide.github.io/Astronews.UI/fontawesome-webfont.8a7cb27d142e3e19.ttf": "13b1eab65a983c7a73bc7997c479d66943f7c6cb",
-    "https://needlide.github.io/Astronews.UI/fontawesome-webfont.cf011583fb81df9f.woff": "28b782240b3e76db824e12c02754a9731a167527",
-    "https://needlide.github.io/Astronews.UI/fontawesome-webfont.da909aa098b0ee2d.svg": "98a8aa5cf7d62c2eff5f07ede8d844b874ef06ed",
-    "https://needlide.github.io/Astronews.UI/fontawesome-webfont.e9955780856cf8aa.woff2": "d6f48cba7d076fb6f2fd6ba993a75b9dc1ecbf0c",
-    "https://needlide.github.io/Astronews.UI/index.html": "edf580c8795560cbfef59d028b24897b470f1d6c",
-    "https://needlide.github.io/Astronews.UI/main.03f0d7e3e64652b5.js": "ebeaf9810f5b424fcc369c8ed5c3a44c37780d9e",
-    "https://needlide.github.io/Astronews.UI/manifest.webmanifest": "557a05af5680df59d88cdae2cd4c349be7ad49c2",
-    "https://needlide.github.io/Astronews.UI/polyfills.16a0eb34d75d0211.js": "b111fbef3ba00d6c5e08ebb337700bf5f3ab495c",
-    "https://needlide.github.io/Astronews.UI/runtime.ef23428cdb8f5f03.js": "47c7e775451c4a2f71c6352882196e834bdad2ef",
-    "https://needlide.github.io/Astronews.UI/styles.d4ac9c5aea51c051.css": "ad81d4ec0777ed055bc2ca1870beba0d51e6bb68"
+    "/assets/_redirects": "f012e82ac67b94d51c0147d1dfcb2a1e1d131c34",
+    "/assets/icons/icon-128x128.png": "b1f06c7d714abb4a0cc4d1f7c954feb26826e4c4",
+    "/assets/icons/icon-144x144.png": "96a0d629765c1bc85d9263c6bc83094ca776d267",
+    "/assets/icons/icon-152x152.png": "b1fbbee3902eb96a7658e3bb006f31f78ca5a44c",
+    "/assets/icons/icon-192x192.png": "e4211163bf0911688fbfb80278d8ff4d2f77691d",
+    "/assets/icons/icon-384x384.png": "329749cd6393768d3131ed6304c136b1ca05f2fd",
+    "/assets/icons/icon-512x512.png": "559d9c4318b45a1f2b10596bbb4c960fe521dbcc",
+    "/assets/icons/icon-72x72.png": "279825a1ac4377032ae996a1832c641e33ccf1b6",
+    "/assets/icons/icon-96x96.png": "592885efcbfee27e5e20be4fa3043589390d2740",
+    "/assets/icons/save-icons.svg": "f7d185e7843ee2c30866bb0b1f807a20cfaa361b",
+    "/assets/images/AstronewsLogo.png": "53d0e848050cf3f09b1c74fc1744b8ad51ce0aa0",
+    "/favicon.ico": "e1a040d3fc713e46a3192fee75e1549505a6ebf9",
+    "/fontawesome-webfont.8a7cb27d142e3e19.ttf": "13b1eab65a983c7a73bc7997c479d66943f7c6cb",
+    "/fontawesome-webfont.cf011583fb81df9f.woff": "28b782240b3e76db824e12c02754a9731a167527",
+    "/fontawesome-webfont.da909aa098b0ee2d.svg": "98a8aa5cf7d62c2eff5f07ede8d844b874ef06ed",
+    "/fontawesome-webfont.e9955780856cf8aa.woff2": "d6f48cba7d076fb6f2fd6ba993a75b9dc1ecbf0c",
+    "/index.html": "8686472dc22cbdbdf5f31361a80e1675ba6e24f0",
+    "/main.03f0d7e3e64652b5.js": "ebeaf9810f5b424fcc369c8ed5c3a44c37780d9e",
+    "/manifest.webmanifest": "557a05af5680df59d88cdae2cd4c349be7ad49c2",
+    "/polyfills.16a0eb34d75d0211.js": "b111fbef3ba00d6c5e08ebb337700bf5f3ab495c",
+    "/runtime.ef23428cdb8f5f03.js": "47c7e775451c4a2f71c6352882196e834bdad2ef",
+    "/styles.d4ac9c5aea51c051.css": "ad81d4ec0777ed055bc2ca1870beba0d51e6bb68"
   },
   "navigationUrls": [
     {
